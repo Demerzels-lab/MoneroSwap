@@ -20,6 +20,7 @@ import { SUPPORTED_CURRENCIES, SUPPORTED_SWAP_PAIRS, isSwapPairSupported, getSwa
 import CurrencyInput from './CurrencyInput';
 import SwapButton from './SwapButton';
 import SwapSettings from './SwapSettings';
+import { useExchangeRate } from '@/hooks/useExchangeRate';
 
 interface SwapCardProps {
   onVisualizing: (v: boolean) => void;
@@ -58,48 +59,8 @@ export default function SwapCard({ onVisualizing }: SwapCardProps) {
     [toCurrencyId]
   );
 
-  // Calculate conversion rate based on currency IDs
-  const calculateRate = useCallback((fromId: string, toId: string): number => {
-    // Default rates - in production, this would come from an API
-    const rates: Record<string, number> = {
-      'xmr-eth': 0.0035,
-      'eth-xmr': 285.7,
-      'xmr-usdc': 150,
-      'usdc-xmr': 0.0067,
-      'xmr-usdt': 150,
-      'usdt-xmr': 0.0067,
-      'xmr-dai': 150,
-      'dai-xmr': 0.0067,
-      'xmr-sol': 4.5,
-      'sol-xmr': 0.222,
-      'eth-usdc': 1800,
-      'usdc-eth': 0.00056,
-      'eth-usdt': 1800,
-      'usdt-eth': 0.00056,
-      'sol-usdc': 100,
-      'usdc-sol': 0.01,
-      'sol-usdt': 100,
-      'usdt-sol': 0.01,
-      'bnb-xmr': 200,
-      'xmr-bnb': 0.005,
-      'matic-xmr': 0.3,
-      'xmr-matic': 3.33,
-      'link-xmr': 4000,
-      'xmr-link': 0.00025,
-      'uni-xmr': 2000,
-      'xmr-uni': 0.0005,
-      'avax-xmr': 180,
-      'xmr-avax': 0.0056,
-    };
-    
-    const rate = rates[`${fromId}-${toId}`];
-    if (rate) return rate;
-
-    // Default fallback rate (very rough approximation)
-    return 1;
-  }, []);
-
-  const rate = calculateRate(fromCurrencyId, toCurrencyId);
+  // Get exchange rate from API with fallback
+  const { rate, isLoading: isRateLoading } = useExchangeRate(fromCurrencyId, toCurrencyId);
 
   // Auto-calculate output amount
   useEffect(() => {
@@ -132,15 +93,15 @@ export default function SwapCard({ onVisualizing }: SwapCardProps) {
     // Generate transaction hash
     const txHash = `0x${Math.random().toString(16).substr(2, 8)}...${Math.random().toString(16).substr(2, 4)}`;
     
-    // Add pending transaction to history
-    const txId = addTransaction({
+    // Add pending transaction to history (with wallet address for API sync)
+    const txId = await addTransaction({
       fromToken: fromCurrency.symbol,
       toToken: toCurrency.symbol,
       fromAmount: fromAmount,
       toAmount: toAmount || '0',
       status: 'pending',
       txHash,
-    });
+    }, address || undefined);
     
     setSwapStage('preparing');
     onVisualizing(true);

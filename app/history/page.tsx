@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Header from '@/components/core/Header';
@@ -25,7 +25,12 @@ export default function HistoryPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const { walletState } = useWalletStore();
-  const { transactions, clearHistory } = useTransactionStore();
+  const { transactions, clearHistory, fetchTransactions, isLoading } = useTransactionStore();
+
+  // Fetch transactions from API on mount and when wallet changes
+  useEffect(() => {
+    fetchTransactions(walletState.address || undefined);
+  }, [walletState.address, fetchTransactions]);
 
   const filteredTransactions = transactions.filter((tx: Transaction) => {
     const matchesSearch = tx.fromToken.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -116,7 +121,13 @@ export default function HistoryPage() {
           transition={{ delay: 0.2 }}
           className="card overflow-hidden"
         >
-          {transactions.length === 0 ? (
+          {isLoading ? (
+            <div className="p-12 text-center">
+              <Loader2 className="w-12 h-12 text-monero-orange mx-auto mb-4 animate-spin" />
+              <h3 className="text-xl font-semibold text-white mb-2">Loading Transactions</h3>
+              <p className="text-gray-400">Fetching your swap history...</p>
+            </div>
+          ) : transactions.length === 0 ? (
             <div className="p-12 text-center">
               <Clock className="w-12 h-12 text-gray-600 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-white mb-2">No Transactions Yet</h3>
