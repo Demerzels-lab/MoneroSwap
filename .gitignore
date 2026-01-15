@@ -1,0 +1,15 @@
+node_modules
+.next
+.env
+.env.local
+.env.production
+*.log
+npm-debug.log*
+.DS_Store
+.vercel
+*.tsbuildinfo
+next-env.d.ts
+dist
+build
+coverage
+.eslintcache

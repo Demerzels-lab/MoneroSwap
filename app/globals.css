@@ -1,0 +1,172 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+@layer base {
+  * {
+    @apply border-obsidian-800;
+  }
+  
+  body {
+    @apply bg-obsidian-950 text-gray-100 font-sans antialiased;
+    background-image: 
+      linear-gradient(rgba(5, 5, 5, 0.97), rgba(5, 5, 5, 0.97)),
+      linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 65, 0.01), rgba(0, 0, 255, 0.03));
+    background-size: 100% 100%, 3px 3px;
+  }
+
+  ::selection {
+    @apply bg-monero-orange/30 text-white;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-obsidian-900;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-obsidian-700 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-monero-orange/80;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply px-6 py-3 bg-monero-orange text-white font-mono font-semibold rounded-lg
+           hover:bg-monero-orangeLight transition-all duration-200
+           active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed
+           shadow-lg shadow-monero-orange/20 hover:shadow-monero-orange/40;
+  }
+
+  .btn-secondary {
+    @apply px-6 py-3 border border-obsidian-700 text-gray-300 font-mono font-medium rounded-lg
+           hover:border-monero-orange hover:text-monero-orange transition-all duration-200
+           active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 bg-obsidian-900 border border-obsidian-700 rounded-lg
+           text-white placeholder-gray-500 font-mono
+           focus:outline-none focus:border-monero-orange focus:ring-2 focus:ring-monero-orange/20
+           transition-all duration-200;
+  }
+
+  .card {
+    @apply bg-obsidian-900/80 backdrop-blur-xl border border-obsidian-800 rounded-2xl
+           shadow-2xl shadow-black/50;
+  }
+
+  .card-interactive {
+    @apply card hover:border-monero-orange/50 transition-all duration-300 cursor-pointer;
+  }
+
+  .terminal-text {
+    @apply font-mono text-terminal-green;
+  }
+
+  .terminal-text-dim {
+    @apply font-mono text-terminal-green/60 text-sm;
+  }
+
+  .status-badge {
+    @apply inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono font-medium;
+  }
+
+  .status-pending {
+    @apply status-badge bg-terminal-yellow/10 text-terminal-yellow border border-terminal-yellow/30;
+  }
+
+  .status-success {
+    @apply status-badge bg-terminal-green/10 text-terminal-green border border-terminal-green/30;
+  }
+
+  .status-error {
+    @apply status-badge bg-terminal-red/10 text-terminal-red border border-terminal-red/30;
+  }
+
+  .nav-link {
+    @apply text-gray-400 hover:text-white font-mono text-sm transition-colors duration-200
+           relative after:content-[''] after:absolute after:left-0 after:-bottom-1
+           after:w-0 after:h-0.5 after:bg-monero-orange after:transition-all
+           hover:after:w-full;
+  }
+
+  .nav-link-active {
+    @apply text-monero-orange after:w-full;
+  }
+
+  .glow-effect {
+    @apply relative;
+  }
+
+  .glow-effect::before {
+    content: '';
+    @apply absolute inset-0 rounded-xl bg-monero-orange/20 blur-xl -z-10 opacity-0
+           transition-opacity duration-300;
+  }
+
+  .glow-effect:hover::before {
+    @apply opacity-100;
+  }
+
+  .scanline-overlay {
+    @apply pointer-events-none fixed inset-0 z-50;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.1) 2px,
+      rgba(0, 0, 0, 0.1) 4px
+    );
+  }
+
+  .crypto-icon {
+    @apply w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold;
+  }
+
+  .crypto-icon-xmr {
+    @apply crypto-icon bg-gradient-to-br from-monero-orange to-monero-orangeDark;
+  }
+
+  .crypto-icon-btc {
+    @apply crypto-icon bg-gradient-to-br from-orange-500 to-orange-700;
+  }
+
+  .crypto-icon-eth {
+    @apply crypto-icon bg-gradient-to-br from-indigo-500 to-indigo-700;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-gradient-to-r from-monero-orange to-monero-orangeLight bg-clip-text text-transparent;
+  }
+
+  .border-glow {
+    box-shadow: 0 0 20px rgba(242, 104, 34, 0.3), inset 0 0 20px rgba(242, 104, 34, 0.1);
+  }
+
+  .animate-in {
+    animation: animateIn 0.5s ease-out forwards;
+  }
+
+  @keyframes animateIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
