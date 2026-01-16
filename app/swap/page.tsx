@@ -26,6 +26,13 @@ export default function SwapPage() {
     return () => clearTimeout(timer);
   }, []);
 
+  // Listen for wallet modal open events from SwapCard
+  useEffect(() => {
+    const handleOpenWalletModal = () => setShowWalletModal(true);
+    window.addEventListener('openWalletModal', handleOpenWalletModal);
+    return () => window.removeEventListener('openWalletModal', handleOpenWalletModal);
+  }, []);
+
   const totalCurrencies = SUPPORTED_CURRENCIES.length;
   const totalChains = SUPPORTED_CHAINS.filter(c => c.type !== 'XMR').length;
 

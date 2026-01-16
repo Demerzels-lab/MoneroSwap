@@ -357,6 +357,10 @@ export default function SwapCard({ onVisualizing }: SwapCardProps) {
           disabled={!isSwapReady || swapStage !== 'idle'}
           stage={swapStage}
           needsConnection={!isConnected}
+          onConnectClick={() => {
+            // Dispatch custom event to open wallet modal
+            window.dispatchEvent(new CustomEvent('openWalletModal'));
+          }}
         />
       </div>
 
