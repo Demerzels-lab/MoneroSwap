@@ -10,6 +10,7 @@ export const metadata: Metadata = {
   description: 'Autonomous cross-chain liquidity protocol using Monero ring signatures. No KYC. No Trace. Pure Alpha.',
   keywords: ['monero', 'atomic swap', 'privacy', 'zero-knowledge', 'mev-protection', 'defi'],
   authors: [{ name: 'MoneroSwap Protocol' }],
+  icons: '/logo.jpeg',
   openGraph: {
     title: 'MoneroSwap | The Invisible Market',
     description: 'Cryptographically secure signal extraction and atomic settlement.',
