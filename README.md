@@ -1,24 +1,22 @@
-# CipherSwap XMR - Privacy-First Atomic Swap Interface
+# MoneroSwap - Zero-Identity Financial Layer
 
-A privacy-focused decentralized exchange interface for trustless atomic swaps between Monero (XMR) and Bitcoin/Ethereum, featuring complete Monero privacy technologies.
-
-![CipherSwap XMR Banner](https://via.placeholder.com/1200x400/050505/F26822?text=CipherSwap+XMR)
+A privacy-focused decentralized exchange interface for trustless atomic swaps between Monero (XMR) and multiple blockchains, featuring complete Monero privacy technologies and zero-knowledge liquidity.
 
 ## Features
 
-### 🔐 Privacy-First Design
+### Zero-Knowledge Privacy
 - **Ring Signatures**: Sender identity is mixed with 10+ decoy outputs
 - **Stealth Addresses**: Recipients receive funds at one-time addresses
 - **RingCT**: Transaction amounts are cryptographically hidden
-- **Client-Side Encryption**: Private keys never leave your browser
+- **Bulletproofs**: Efficient range proofs for confidential transactions
 
-### ⚡ Trustless Atomic Swaps
+### Trustless Atomic Swaps
 - Cross-chain swaps without intermediaries
 - HTLC-based protocol for guaranteed execution
 - Automatic refund on protocol failure
 - No custody of funds
 
-### 🛡️ Security Features
+### Security Features
 - WebAssembly-based cryptography
 - View key protection (never transmitted)
 - Local transaction signing
@@ -36,8 +34,8 @@ A privacy-focused decentralized exchange interface for trustless atomic swaps be
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/cipherswap-xmr.git
-cd cipherswap-xmr
+git clone https://github.com/yourusername/moneroswap.git
+cd moneroswap
 
 # Install dependencies
 npm install
@@ -68,7 +66,7 @@ NEXT_PUBLIC_ENABLE_ANALYTICS=false
 ## Architecture
 
 ```
-cipherswap-xmr/
+moneroswap/
 ├── app/                    # Next.js App Router pages
 │   ├── layout.tsx         # Root layout with providers
 │   ├── page.tsx           # Main swap interface
@@ -189,7 +187,7 @@ npm run start
 ## Roadmap
 
 - [ ] Mainnet launch
-- [ ] Additional currency pairs (ETH, ERC-20)
+- [ ] Additional currency pairs (ETH, SOL, ERC-20)
 - [ ] Mobile wallet integration
 - [ ] Hardware wallet support
 - [ ] Tor onion service
@@ -211,4 +209,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Built with 🔶 by the CipherSwap Team**
+**Built with 🔶 by the MoneroSwap Protocol**
