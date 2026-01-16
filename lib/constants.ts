@@ -359,39 +359,75 @@ export const DEFAULT_TIMELOCK = 24; // 24 hours in blocks
 // ============================================================================
 
 export const SUPPORTED_SWAP_PAIRS = [
-  // XMR pairs
+  // --- XMR OUTBOUND (XMR -> Other) ---
   { from: 'xmr', to: 'eth', minAmount: 0.01, maxAmount: 1000 },
   { from: 'xmr', to: 'usdc', minAmount: 1, maxAmount: 50000 },
   { from: 'xmr', to: 'usdt', minAmount: 1, maxAmount: 50000 },
   { from: 'xmr', to: 'dai', minAmount: 1, maxAmount: 50000 },
+  { from: 'xmr', to: 'bnb', minAmount: 0.01, maxAmount: 1000 },
+  { from: 'xmr', to: 'matic', minAmount: 0.01, maxAmount: 1000 },
+  { from: 'xmr', to: 'sol', minAmount: 0.01, maxAmount: 1000 },
+  // ADDED: AVAX Outbound
+  { from: 'xmr', to: 'avax', minAmount: 0.01, maxAmount: 1000 },
   
-  // ETH pairs
+  // --- ETH PAIRS ---
   { from: 'eth', to: 'xmr', minAmount: 0.001, maxAmount: 100 },
   { from: 'eth', to: 'usdc', minAmount: 0.001, maxAmount: 10000 },
   { from: 'eth', to: 'usdt', minAmount: 0.001, maxAmount: 10000 },
   { from: 'eth', to: 'dai', minAmount: 0.001, maxAmount: 10000 },
   { from: 'eth', to: 'link', minAmount: 1, maxAmount: 10000 },
   { from: 'eth', to: 'uni', minAmount: 1, maxAmount: 10000 },
+  // ADDED: ETH -> SOL, ETH -> BNB, ETH -> AVAX
+  { from: 'eth', to: 'sol', minAmount: 0.01, maxAmount: 100 },
+  { from: 'eth', to: 'bnb', minAmount: 0.01, maxAmount: 100 },
+  { from: 'eth', to: 'avax', minAmount: 0.01, maxAmount: 100 },
   
-  // SOL pairs
+  // --- SOL PAIRS ---
   { from: 'sol', to: 'xmr', minAmount: 0.1, maxAmount: 5000 },
   { from: 'sol', to: 'usdc', minAmount: 1, maxAmount: 50000 },
   { from: 'sol', to: 'usdt', minAmount: 1, maxAmount: 50000 },
   { from: 'sol', to: 'eth', minAmount: 0.01, maxAmount: 5000 },
   
-  // Stablecoin pairs
+  // --- BNB PAIRS (BSC) ---
+  { from: 'bnb', to: 'xmr', minAmount: 0.01, maxAmount: 500 },
+  // ADDED: BNB -> ETH, BNB -> Stables, BNB -> AVAX
+  { from: 'bnb', to: 'eth', minAmount: 0.01, maxAmount: 100 },
+  { from: 'bnb', to: 'usdc', minAmount: 0.05, maxAmount: 50000 },
+  { from: 'bnb', to: 'usdt', minAmount: 0.05, maxAmount: 50000 },
+  { from: 'bnb', to: 'avax', minAmount: 0.05, maxAmount: 500 },
+
+  // --- AVAX PAIRS (Avalanche) ---
+  // ADDED: All AVAX pairs were missing previously
+  { from: 'avax', to: 'xmr', minAmount: 0.1, maxAmount: 500 },
+  { from: 'avax', to: 'eth', minAmount: 0.1, maxAmount: 100 },
+  { from: 'avax', to: 'usdc', minAmount: 0.5, maxAmount: 50000 },
+  { from: 'avax', to: 'usdt', minAmount: 0.5, maxAmount: 50000 },
+  { from: 'avax', to: 'bnb', minAmount: 0.1, maxAmount: 500 },
+
+  // --- MATIC PAIRS (Polygon) ---
+  { from: 'matic', to: 'xmr', minAmount: 10, maxAmount: 50000 },
+  // ADDED: MATIC -> ETH
+  { from: 'matic', to: 'eth', minAmount: 10, maxAmount: 5000 },
+  
+  // --- STABLECOIN PAIRS ---
   { from: 'usdc', to: 'xmr', minAmount: 1, maxAmount: 50000 },
   { from: 'usdc', to: 'eth', minAmount: 1, maxAmount: 50000 },
   { from: 'usdc', to: 'sol', minAmount: 1, maxAmount: 50000 },
   { from: 'usdc', to: 'dai', minAmount: 1, maxAmount: 100000 },
+  // ADDED: USDC -> BNB/AVAX
+  { from: 'usdc', to: 'bnb', minAmount: 1, maxAmount: 50000 },
+  { from: 'usdc', to: 'avax', minAmount: 1, maxAmount: 50000 },
   
   { from: 'usdt', to: 'xmr', minAmount: 1, maxAmount: 50000 },
   { from: 'usdt', to: 'eth', minAmount: 1, maxAmount: 50000 },
   { from: 'usdt', to: 'sol', minAmount: 1, maxAmount: 50000 },
+  // ADDED: USDT -> BNB/AVAX
+  { from: 'usdt', to: 'bnb', minAmount: 1, maxAmount: 50000 },
+  { from: 'usdt', to: 'avax', minAmount: 1, maxAmount: 50000 },
   
-  // Cross-chain from BSC/Polygon
-  { from: 'bnb', to: 'xmr', minAmount: 0.01, maxAmount: 500 },
-  { from: 'matic', to: 'xmr', minAmount: 10, maxAmount: 50000 },
+  // --- TOKEN RETURN PATHS ---
+  { from: 'link', to: 'eth', minAmount: 1, maxAmount: 10000 },
+  { from: 'uni', to: 'eth', minAmount: 1, maxAmount: 10000 },
 ];
 
 // ============================================================================

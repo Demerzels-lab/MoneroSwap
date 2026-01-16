@@ -117,14 +117,16 @@ export default function SwapButton({
     <motion.button
       onClick={handleClick}
       disabled={disabled && !needsConnection}
-      whileHover={stage === 'idle' && !needsConnection ? { scale: 1.02 } : {}}
-      whileTap={stage === 'idle' && !needsConnection ? { scale: 0.98 } : {}}
+      // FIXED: Allow animations when connecting is needed
+      whileHover={(stage === 'idle' || needsConnection) ? { scale: 1.02 } : {}}
+      whileTap={(stage === 'idle' || needsConnection) ? { scale: 0.98 } : {}}
       className={`w-full py-4 rounded-xl font-semibold font-mono text-sm transition-all flex items-center justify-center gap-2
         ${getButtonClass()}
         ${needsConnection
-          ? 'bg-gradient-to-r from-monero-orange to-monero-orangeLight text-white hover:shadow-lg hover:shadow-monero-orange/30'
+          // FIXED: Added cursor-pointer to this line
+          ? 'bg-gradient-to-r from-monero-orange to-monero-orangeLight text-white hover:shadow-lg hover:shadow-monero-orange/30 cursor-pointer'
           : stage === 'idle' 
-            ? 'bg-monero-orange text-white hover:bg-monero-orangeLight shadow-lg shadow-monero-orange/20' 
+            ? 'bg-monero-orange text-white hover:bg-monero-orangeLight shadow-lg shadow-monero-orange/20 cursor-pointer' 
             : 'bg-obsidian-800 text-gray-400 cursor-not-allowed'
         }
         ${disabled && !needsConnection ? 'opacity-50 cursor-not-allowed' : ''}
