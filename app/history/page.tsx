@@ -39,7 +39,7 @@ export default function HistoryPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col relative bg-background text-white selection:bg-white selection:text-black">
+    <div className="min-h-screen flex flex-col relative text-white selection:bg-white selection:text-black">
       {/* Background Texture */}
       <div className="fixed inset-0 z-0 pointer-events-none opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
       

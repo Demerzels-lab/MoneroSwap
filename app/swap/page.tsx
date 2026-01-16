@@ -38,7 +38,7 @@ export default function SwapPage() {
   const totalChains = SUPPORTED_CHAINS.filter(c => c.type !== 'XMR').length;
 
   return (
-    <div className="min-h-screen flex flex-col relative overflow-hidden bg-background text-white selection:bg-white selection:text-black">
+    <div className="min-h-screen flex flex-col relative overflow-hidden text-white selection:bg-white selection:text-black">
       
       {/* Background Texture - Replaces Scanline */}
       <div className="fixed inset-0 z-0 pointer-events-none opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
@@ -106,7 +106,8 @@ export default function SwapPage() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="flex-1 w-full max-w-lg mx-auto lg:max-w-none"
           >
-            <SwapCard /> {/* Props removed as SwapCard now handles its own state via store */}
+            {/* Pass the state setter function to the component */}
+            <SwapCard onVisualizing={setIsVisualizing} /> 
           </motion.div>
 
           {/* Privacy Visualizer Panel - Aligned to side */}
