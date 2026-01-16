@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Header from '@/components/core/Header';
@@ -8,22 +8,42 @@ import Footer from '@/components/core/Footer';
 import WalletConnectModal from '@/components/wallet/WalletConnectModal';
 import { useWalletStore } from '@/store/useSwapStore';
 import { 
-  Shield, Zap, Globe, Lock, Coins, Code, Wallet, ArrowRight, 
-  ChevronDown, ChevronUp, Link2, Eye, EyeOff, Check, Mail,
-  Layers, RefreshCcw, Users, Clock
+  ArrowRight, ChevronDown, ChevronUp, 
+  Shield, Zap, Lock, Activity, Layers, 
+  Cpu, Network, Eye, Key, Terminal 
 } from 'lucide-react';
 
-// Animation wrapper for scroll reveal
-function AnimatedSection({ children, className = '', delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
+// === UI COMPONENTS ===
+
+// 1. Subtle Network Background (The "Connected Nodes" look)
+const NetworkBackground = () => (
+  <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-[0.15]">
+    <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="grid-net" width="40" height="40" patternUnits="userSpaceOnUse">
+          <circle cx="1" cy="1" r="1" className="fill-white" />
+          <path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" strokeWidth="0.5" opacity="0.3" />
+        </pattern>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#grid-net)" />
+    </svg>
+    {/* Decorative large circles */}
+    <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
+    <div className="absolute bottom-1/3 right-1/4 w-64 h-64 bg-obsidian-800/20 rounded-full blur-3xl" />
+  </div>
+);
+
+// 2. Scroll Reveal Wrapper
+function FadeIn({ children, delay = 0, className = '' }: { children: React.ReactNode; delay?: number; className?: string }) {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '-100px' });
+  const isInView = useInView(ref, { once: true, margin: '-50px' });
   
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 40 }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
-      transition={{ duration: 0.6, delay }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+      transition={{ duration: 0.6, delay, ease: "easeOut" }}
       className={className}
     >
       {children}
@@ -31,149 +51,110 @@ function AnimatedSection({ children, className = '', delay = 0 }: { children: Re
   );
 }
 
-// Hero Section
+// === SECTIONS ===
+
+// Hero: High-End Editorial Style
 function HeroSection({ onLaunchApp }: { onLaunchApp: () => void }) {
   return (
-    <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
-      {/* Gradient background */}
-      <div className="absolute inset-0 bg-gradient-radial from-monero-orange/15 via-transparent to-transparent" />
-      <div className="absolute inset-0 bg-grid-pattern opacity-30" />
+    <section className="relative min-h-screen flex items-center justify-center pt-20">
+      <NetworkBackground />
       
-      {/* Animated particles */}
-      <div className="absolute inset-0 overflow-hidden">
-        {[...Array(20)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-1 h-1 bg-monero-orange/30 rounded-full"
-            style={{ left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%` }}
-            animate={{
-              y: [-20, 20, -20],
-              opacity: [0.3, 0.6, 0.3],
-            }}
-            transition={{
-              duration: 3 + Math.random() * 2,
-              repeat: Infinity,
-              delay: Math.random() * 2,
-            }}
-          />
-        ))}
-      </div>
-      
-      <div className="container mx-auto px-4 text-center relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6">
-            <span className="text-gradient">Privacy-First</span>
-            <br />
-            <span className="text-white">Cross-Chain Swaps</span>
+      <div className="container mx-auto px-6 relative z-10 text-center">
+        <FadeIn>
+          <div className="text-label mb-6">EST. 2026 — DECENTRALIZED PROTOCOL</div>
+          <h1 className="text-display max-w-5xl mx-auto mb-8">
+            Redefining Liquidity <br />
+            <span className="text-obsidian-500">Through Zero-Knowledge</span> <br />
+            Atomic Swaps.
           </h1>
-          <p className="text-xl text-gray-400 max-w-2xl mx-auto mb-8">
-            Trustless atomic swaps powered by Monero's ring signature technology. 
-            Swap between ETH, SOL, XMR, and 20+ tokens with complete privacy.
+          <p className="text-xl text-obsidian-400 max-w-2xl mx-auto mb-12 font-light leading-relaxed">
+            Combine <span className="text-white font-medium">Monero privacy</span> with 
+            <span className="text-white font-medium"> cross-chain execution</span>. 
+            Swap between ETH, SOL, and XMR without exposing your identity, wallet, or behavioral fingerprints.
           </p>
           
-          <div className="flex flex-wrap items-center justify-center gap-4 mb-12">
-            <Link href="/swap">
-              <button onClick={onLaunchApp} className="btn-primary flex items-center gap-2 text-lg px-8 py-4">
-                Launch App <ArrowRight className="w-5 h-5" />
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link href="/swap" className="w-full sm:w-auto">
+              <button onClick={onLaunchApp} className="btn-primary w-full sm:w-auto">
+                Start Swapping <ArrowRight className="w-4 h-4" />
               </button>
             </Link>
-            <Link href="/docs">
-              <button className="btn-secondary flex items-center gap-2 text-lg px-8 py-4">
-                Read Documentation
+            <Link href="/docs" className="w-full sm:w-auto">
+              <button className="btn-secondary w-full sm:w-auto">
+                Read Whitepaper
               </button>
             </Link>
           </div>
-          
-          {/* Stats bar */}
-          <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-12">
-            {[
-              { value: '7+', label: 'Chains Supported' },
-              { value: '20+', label: 'Tokens' },
-              { value: '0', label: 'KYC Required' },
-              { value: '100%', label: 'Privacy' },
-            ].map((stat, i) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 + i * 0.1 }}
-                className="text-center"
-              >
-                <p className="text-3xl font-bold text-monero-orange font-mono">{stat.value}</p>
-                <p className="text-sm text-gray-500">{stat.label}</p>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
+        </FadeIn>
+        
+        {/* Editorial Stats Bar */}
+        <FadeIn delay={0.2} className="mt-24 pt-8 border-t border-obsidian-800/50 flex flex-wrap justify-center gap-12 md:gap-24">
+          {[
+            { label: 'Network Status', value: 'OPERATIONAL' },
+            { label: 'Privacy Level', value: 'MAXIMUM' },
+            { label: 'Zero Knowledge', value: 'ENABLED' },
+          ].map((stat) => (
+            <div key={stat.label} className="text-center">
+              <div className="text-label mb-1">{stat.label}</div>
+              <div className="font-mono text-sm text-white tracking-widest">{stat.value}</div>
+            </div>
+          ))}
+        </FadeIn>
       </div>
-      
-      {/* Scroll indicator */}
-      <motion.div
-        className="absolute bottom-8 left-1/2 -translate-x-1/2"
-        animate={{ y: [0, 10, 0] }}
-        transition={{ duration: 2, repeat: Infinity }}
-      >
-        <ChevronDown className="w-6 h-6 text-gray-500" />
-      </motion.div>
     </section>
   );
 }
 
-// How It Works Section
-function HowItWorksSection() {
-  const steps = [
+// Vision: Dark Mode "Manifesto"
+function VisionSection() {
+  const tenets = [
     { 
-      icon: Wallet, 
-      title: 'Connect Your Wallet', 
-      description: 'Connect MetaMask for EVM chains or Phantom for Solana. Your keys never leave your browser.',
-      color: 'from-blue-500 to-cyan-500'
+      number: '01', 
+      title: 'Privacy Precedes Scale', 
+      desc: 'Users should not have to trade sovereignty for liquidity. We treat privacy as a fundamental human right, not a feature.' 
     },
     { 
-      icon: Coins, 
-      title: 'Select Your Tokens', 
-      description: 'Choose from 20+ supported tokens across 7 blockchains. Smart routing finds the best rates.',
-      color: 'from-purple-500 to-pink-500'
+      number: '02', 
+      title: 'Execution Must Be Atomic', 
+      desc: 'Trust is a vulnerability. Atomic swaps ensure that assets are exchanged simultaneously or not at all.' 
     },
     { 
-      icon: Shield, 
-      title: 'Privacy Protocol Activates', 
-      description: 'Monero\'s ring signatures kick in. Your transaction becomes untraceable and unlinkable.',
-      color: 'from-monero-orange to-monero-orangeLight'
-    },
-    { 
-      icon: Zap, 
-      title: 'Atomic Swap Executes', 
-      description: 'Hash time-locked contracts ensure trustless execution. No middlemen, no custody.',
-      color: 'from-terminal-green to-emerald-500'
+      number: '03', 
+      title: 'Identity is Optional', 
+      desc: 'No KYC. No sign-ups. Your wallet address is the only identity you need, and even that is obfuscated.' 
     },
   ];
 
   return (
-    <section id="how-it-works" className="py-24 relative">
-      <div className="container mx-auto px-4">
-        <AnimatedSection className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-white mb-4">How MoneroSwap Works</h2>
-          <p className="text-gray-400 text-lg max-w-xl mx-auto">
-            Four simple steps to complete privacy-preserving swaps
+    <section className="py-32 bg-background border-y border-obsidian-900">
+      <div className="container mx-auto px-6 grid lg:grid-cols-2 gap-16 items-start">
+        <FadeIn>
+          <div className="text-label mb-4">OUR VISION</div>
+          <h2 className="text-5xl font-serif text-white leading-tight mb-8">
+            The less visible the trader, <br />
+            <span className="text-obsidian-500">the stronger the market.</span>
+          </h2>
+          <p className="text-obsidian-300 text-lg leading-relaxed max-w-md">
+            We are building a future where financial intelligence is harvested without 
+            compromising the sovereign identity of the originator.
           </p>
-        </AnimatedSection>
-        
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {steps.map((step, i) => (
-            <AnimatedSection key={step.title} delay={i * 0.1}>
-              <div className="card p-6 h-full group hover:border-monero-orange/50 transition-all duration-300">
-                <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${step.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
-                  <step.icon className="w-7 h-7 text-white" />
-                </div>
-                <div className="text-sm font-mono text-monero-orange mb-2">Step {i + 1}</div>
-                <h3 className="text-xl font-semibold text-white mb-2">{step.title}</h3>
-                <p className="text-gray-400 text-sm">{step.description}</p>
+        </FadeIn>
+
+        <div className="space-y-12">
+          {tenets.map((item, i) => (
+            <FadeIn key={item.number} delay={i * 0.1} className="flex gap-6 group">
+              <div className="font-mono text-obsidian-600 text-sm mt-1 group-hover:text-white transition-colors">
+                {item.number}
               </div>
-            </AnimatedSection>
+              <div>
+                <h3 className="text-xl text-white mb-2 font-medium group-hover:translate-x-1 transition-transform">
+                  {item.title}
+                </h3>
+                <p className="text-obsidian-400 leading-relaxed text-sm">
+                  {item.desc}
+                </p>
+              </div>
+            </FadeIn>
           ))}
         </div>
       </div>
@@ -181,226 +162,226 @@ function HowItWorksSection() {
   );
 }
 
-// Technology Section
-function TechnologySection() {
-  const techs = [
-    { 
-      title: 'Ring Signatures',
-      icon: Link2,
-      description: 'Your signature is grouped with 10+ decoys. Impossible to determine the real sender.',
-    },
-    { 
-      title: 'Stealth Addresses',
-      icon: EyeOff,
-      description: 'One-time addresses for every transaction. Receiving addresses never appear on blockchain.',
-    },
-    { 
-      title: 'RingCT',
-      icon: Eye,
-      description: 'Transaction amounts encrypted using Pedersen commitments. Network verifies without seeing values.',
-    },
-    { 
-      title: 'Bulletproofs',
-      icon: Zap,
-      description: 'Zero-knowledge proofs 80% smaller than predecessors. Fast verification, low fees.',
-    },
-  ];
-
+// Architecture: The "3 Column" Tech Stack
+function ArchitectureSection() {
   return (
-    <section id="technology" className="py-24 relative bg-obsidian-900/50">
-      <div className="container mx-auto px-4">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left: Problem/Solution */}
-          <AnimatedSection>
-            <h2 className="text-4xl font-bold text-white mb-4">
-              Powered by Monero Privacy Technology
-            </h2>
-            <p className="text-gray-400 mb-8">
-              Understanding the cryptographic innovations that make truly private transactions possible.
-            </p>
-            
-            <div className="space-y-6">
-              <div className="card p-6 border-terminal-red/30">
-                <h4 className="text-terminal-red font-semibold mb-2">The Problem with Traditional Crypto</h4>
-                <ul className="space-y-2 text-gray-400 text-sm">
-                  <li className="flex items-center gap-2"><span className="text-terminal-red">X</span> Traced: Anyone can follow the flow of funds</li>
-                  <li className="flex items-center gap-2"><span className="text-terminal-red">X</span> Linked: Addresses connected to real identities</li>
-                  <li className="flex items-center gap-2"><span className="text-terminal-red">X</span> Analyzed: Companies profile your activity</li>
-                  <li className="flex items-center gap-2"><span className="text-terminal-red">X</span> Censored: Transactions blocked based on history</li>
-                </ul>
+    <section className="py-32 bg-obsidian-950">
+      <div className="container mx-auto px-6">
+        <FadeIn className="text-center mb-20">
+          <h2 className="text-4xl md:text-5xl font-serif text-white mb-6">Protocol Architecture</h2>
+          <p className="text-obsidian-400 max-w-2xl mx-auto">
+            A hybrid system combining Monero's ring signatures with high-performance EVM smart contracts.
+          </p>
+        </FadeIn>
+
+        <div className="grid md:grid-cols-3 gap-8">
+          {/* Layer 0: Privacy */}
+          <FadeIn delay={0.1}>
+            <div className="bento-card p-8 h-full flex flex-col">
+              <div className="w-12 h-12 bg-white text-black rounded-lg flex items-center justify-center mb-8">
+                <Eye className="w-6 h-6" />
               </div>
+              <div className="text-label mb-2">LAYER 0: OBFUSCATION</div>
+              <h3 className="text-2xl font-serif text-white mb-4">Zero-Knowledge Signal Layer</h3>
+              <p className="text-obsidian-400 text-sm mb-8 flex-1">
+                Cryptographically secure signal extraction from human operators using Ring Signatures.
+              </p>
               
-              <div className="card p-6 border-terminal-green/30">
-                <h4 className="text-terminal-green font-semibold mb-2">MoneroSwap's Solution</h4>
-                <ul className="space-y-2 text-gray-400 text-sm">
-                  <li className="flex items-center gap-2"><Check className="w-4 h-4 text-terminal-green" /> Encrypted & mixed transactions</li>
-                  <li className="flex items-center gap-2"><Check className="w-4 h-4 text-terminal-green" /> Stealth addresses for recipients</li>
-                  <li className="flex items-center gap-2"><Check className="w-4 h-4 text-terminal-green" /> Hidden amounts via RingCT</li>
-                  <li className="flex items-center gap-2"><Check className="w-4 h-4 text-terminal-green" /> Complete censorship resistance</li>
-                </ul>
+              <div className="space-y-3 pt-6 border-t border-obsidian-800">
+                <div className="flex justify-between text-sm">
+                  <span className="text-obsidian-500 font-mono">Privacy</span>
+                  <span className="text-white font-mono">RingCT + Bulletproofs</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-obsidian-500 font-mono">Identity</span>
+                  <span className="text-white font-mono">Stealth Addresses</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-obsidian-500 font-mono">Client</span>
+                  <span className="text-white font-mono">WASM / Rust</span>
+                </div>
               </div>
             </div>
-          </AnimatedSection>
-          
-          {/* Right: Tech Cards */}
-          <div className="grid sm:grid-cols-2 gap-4">
-            {techs.map((tech, i) => (
-              <AnimatedSection key={tech.title} delay={i * 0.1}>
-                <div className="card p-5 h-full group hover:border-monero-orange/50 transition-all">
-                  <tech.icon className="w-8 h-8 text-monero-orange mb-3" />
-                  <h4 className="text-white font-semibold mb-2">{tech.title}</h4>
-                  <p className="text-gray-400 text-sm">{tech.description}</p>
-                </div>
-              </AnimatedSection>
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
+          </FadeIn>
 
-// Features Section
-function FeaturesSection() {
-  const features = [
-    { icon: Shield, title: 'Privacy First', description: 'Every swap protected by ring signatures, stealth addresses, and encrypted amounts.' },
-    { icon: Globe, title: 'Multi-Chain Support', description: 'Swap across Ethereum, Solana, Polygon, BSC, Avalanche, Arbitrum, and Optimism.' },
-    { icon: Lock, title: 'No KYC Ever', description: 'No email, no phone, no ID. Just connect your wallet and swap.' },
-    { icon: RefreshCcw, title: 'Atomic Swaps', description: 'Trustless HTLCs ensure both parties fulfill obligations. No counterparty risk.' },
-    { icon: Coins, title: 'Low Fees', description: 'Optimized smart contracts and efficient routing minimize gas costs.' },
-    { icon: Code, title: 'Open Source', description: 'All code is open source and auditable. Trust is verified, not assumed.' },
-  ];
-
-  return (
-    <section className="py-24">
-      <div className="container mx-auto px-4">
-        <AnimatedSection className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-white mb-4">Why Choose MoneroSwap</h2>
-          <p className="text-gray-400 text-lg">The most private way to swap crypto assets</p>
-        </AnimatedSection>
-        
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {features.map((feature, i) => (
-            <AnimatedSection key={feature.title} delay={i * 0.1}>
-              <div className="card p-6 h-full group hover:border-monero-orange/50 transition-all">
-                <div className="w-12 h-12 rounded-lg bg-monero-orange/10 flex items-center justify-center mb-4 group-hover:bg-monero-orange/20 transition-colors">
-                  <feature.icon className="w-6 h-6 text-monero-orange" />
-                </div>
-                <h3 className="text-xl font-semibold text-white mb-2">{feature.title}</h3>
-                <p className="text-gray-400">{feature.description}</p>
+          {/* Layer 1: Settlement */}
+          <FadeIn delay={0.2}>
+            <div className="bento-card p-8 h-full flex flex-col">
+              <div className="w-12 h-12 bg-obsidian-800 text-white rounded-lg flex items-center justify-center mb-8">
+                <Network className="w-6 h-6" />
               </div>
-            </AnimatedSection>
-          ))}
+              <div className="text-label mb-2">LAYER 1: SETTLEMENT</div>
+              <h3 className="text-2xl font-serif text-white mb-4">Atomic Swap Aggregation</h3>
+              <p className="text-obsidian-400 text-sm mb-8 flex-1">
+                Trustless HTLCs (Hash Time Locked Contracts) ensure assets move only when secrets are revealed.
+              </p>
+              
+              <div className="space-y-3 pt-6 border-t border-obsidian-800">
+                <div className="flex justify-between text-sm">
+                  <span className="text-obsidian-500 font-mono">Contracts</span>
+                  <span className="text-white font-mono">Solidity / Anchor</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-obsidian-500 font-mono">Verification</span>
+                  <span className="text-white font-mono">On-Chain Proofs</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-obsidian-500 font-mono">Liquidity</span>
+                  <span className="text-white font-mono">Unified Pools</span>
+                </div>
+              </div>
+            </div>
+          </FadeIn>
+
+          {/* Layer 2: Execution */}
+          <FadeIn delay={0.3}>
+            <div className="bento-card p-8 h-full flex flex-col">
+              <div className="w-12 h-12 bg-obsidian-800 text-white rounded-lg flex items-center justify-center mb-8">
+                <Terminal className="w-6 h-6" />
+              </div>
+              <div className="text-label mb-2">LAYER 2: EXECUTION</div>
+              <h3 className="text-2xl font-serif text-white mb-4">Autonomous Runtime</h3>
+              <p className="text-obsidian-400 text-sm mb-8 flex-1">
+                High-frequency execution engine with MEV protection and risk guardrails.
+              </p>
+              
+              <div className="space-y-3 pt-6 border-t border-obsidian-800">
+                <div className="flex justify-between text-sm">
+                  <span className="text-obsidian-500 font-mono">Latency</span>
+                  <span className="text-white font-mono">&lt; 50ms</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-obsidian-500 font-mono">Protection</span>
+                  <span className="text-white font-mono">Flashbots / Bundlers</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-obsidian-500 font-mono">Network</span>
+                  <span className="text-white font-mono">Arbitrum / LayerZero</span>
+                </div>
+              </div>
+            </div>
+          </FadeIn>
         </div>
       </div>
     </section>
   );
 }
 
-// Roadmap Section
-function RoadmapSection() {
-  const quarters = [
-    {
-      quarter: 'Q1 2026',
-      title: 'Foundation',
-      status: 'current',
-      items: ['Multi-chain swap interface', 'MetaMask & Phantom integration', 'Ring signature visualization', 'Public beta launch', 'Security audit completion'],
-    },
-    {
-      quarter: 'Q2 2026',
-      title: 'Expansion',
-      status: 'upcoming',
-      items: ['Mobile-responsive PWA', 'Hardware wallet support', 'Additional EVM chains', 'Limit order functionality', 'Price alerts'],
-    },
-    {
-      quarter: 'Q3 2026',
-      title: 'Integration',
-      status: 'upcoming',
-      items: ['DEX aggregator integration', 'Cross-chain liquidity pools', 'API for developers', 'Institutional features', 'Advanced privacy options'],
-    },
-    {
-      quarter: 'Q4 2026',
-      title: 'Decentralization',
-      status: 'upcoming',
-      items: ['Governance token launch', 'DAO formation', 'Community voting', 'Revenue sharing', 'Grants program'],
-    },
-  ];
-
+// Features: "Bento Grid" Style
+function FeatureGrid() {
   return (
-    <section id="roadmap" className="py-24 bg-obsidian-900/50">
-      <div className="container mx-auto px-4">
-        <AnimatedSection className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-white mb-4">Roadmap 2026</h2>
-          <p className="text-gray-400 text-lg">Our journey to becoming the leading privacy-first DEX</p>
-        </AnimatedSection>
-        
+    <section className="py-32">
+      <div className="container mx-auto px-6">
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {quarters.map((q, i) => (
-            <AnimatedSection key={q.quarter} delay={i * 0.1}>
-              <div className={`card p-6 h-full relative overflow-hidden ${q.status === 'current' ? 'border-monero-orange/50' : ''}`}>
-                {q.status === 'current' && (
-                  <div className="absolute top-0 right-0 px-2 py-1 bg-monero-orange text-white text-xs font-mono rounded-bl-lg">
-                    CURRENT
-                  </div>
-                )}
-                <div className="flex items-center gap-2 mb-3">
-                  <Clock className="w-5 h-5 text-monero-orange" />
-                  <span className="font-mono text-monero-orange text-sm">{q.quarter}</span>
-                </div>
-                <h3 className="text-xl font-semibold text-white mb-4">{q.title}</h3>
-                <ul className="space-y-2">
-                  {q.items.map((item, j) => (
-                    <li key={j} className="flex items-start gap-2 text-sm text-gray-400">
-                      <div className={`w-1.5 h-1.5 rounded-full mt-1.5 ${q.status === 'current' && j < 3 ? 'bg-terminal-green' : 'bg-gray-600'}`} />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
+          
+          {/* Card 1 */}
+          <FadeIn delay={0.1} className="lg:col-span-2">
+            <div className="bento-card p-8 h-full relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+                <Shield className="w-32 h-32" />
               </div>
-            </AnimatedSection>
-          ))}
+              <div className="w-10 h-10 rounded-full border border-obsidian-700 flex items-center justify-center mb-6">
+                <Lock className="w-5 h-5" />
+              </div>
+              <h3 className="text-2xl font-serif text-white mb-3">Encrypted Intuition</h3>
+              <p className="text-obsidian-400 text-sm max-w-sm">
+                Humans submit encrypted market intuition without revealing identity. 
+                Your alpha remains yours until the moment of execution.
+              </p>
+            </div>
+          </FadeIn>
+
+          {/* Card 2 */}
+          <FadeIn delay={0.2}>
+            <div className="bento-card p-8 h-full group hover:bg-white hover:text-black transition-colors duration-300">
+              <Activity className="w-8 h-8 mb-6 text-obsidian-400 group-hover:text-black" />
+              <h3 className="text-xl font-serif mb-2">No KYC</h3>
+              <p className="text-sm opacity-70">
+                Zero identity verification required. Pure code-based trust.
+              </p>
+            </div>
+          </FadeIn>
+
+          {/* Card 3 */}
+          <FadeIn delay={0.3}>
+            <div className="bento-card p-8 h-full group hover:bg-white hover:text-black transition-colors duration-300">
+              <Cpu className="w-8 h-8 mb-6 text-obsidian-400 group-hover:text-black" />
+              <h3 className="text-xl font-serif mb-2">Automated</h3>
+              <p className="text-sm opacity-70">
+                Smart routing finds the best rates across 7+ chains instantly.
+              </p>
+            </div>
+          </FadeIn>
+
+           {/* Card 4 - Wide */}
+           <FadeIn delay={0.4} className="lg:col-span-2">
+            <div className="bento-card p-8 h-full flex flex-col justify-center items-start">
+              <div className="text-label mb-2">THE MECHANISM</div>
+              <h3 className="text-2xl font-serif text-white mb-4">Cryptographically Proven Anonymity</h3>
+              <p className="text-obsidian-400 text-sm mb-6 max-w-md">
+                Profits flow back through anonymous contribution mechanisms, ensuring that 
+                success is rewarded without exposing the winner.
+              </p>
+              <div className="flex gap-4">
+                <div className="px-3 py-1 rounded-full border border-obsidian-800 text-xs font-mono text-obsidian-400">ZK-SNARKS</div>
+                <div className="px-3 py-1 rounded-full border border-obsidian-800 text-xs font-mono text-obsidian-400">CIRCOM</div>
+                <div className="px-3 py-1 rounded-full border border-obsidian-800 text-xs font-mono text-obsidian-400">SOLIDITY</div>
+              </div>
+            </div>
+          </FadeIn>
+           
+           {/* Card 5 */}
+           <FadeIn delay={0.5} className="lg:col-span-2">
+            <div className="bento-card p-8 h-full relative overflow-hidden">
+               <div className="absolute inset-0 opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
+               <div className="relative z-10 flex items-center justify-between">
+                 <div>
+                    <h3 className="text-2xl font-serif text-white mb-2">Ready to vanish?</h3>
+                    <p className="text-obsidian-400 text-sm">The network is waiting for your signal.</p>
+                 </div>
+                 <Link href="/swap">
+                    <button className="btn-primary rounded-full px-8">Launch App</button>
+                 </Link>
+               </div>
+            </div>
+          </FadeIn>
+
         </div>
       </div>
     </section>
   );
 }
 
-// FAQ Section
+// FAQ: Minimal Accordion
 function FAQSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   
   const faqs = [
-    { q: 'What is MoneroSwap?', a: 'MoneroSwap is a decentralized exchange that enables privacy-preserving atomic swaps between different cryptocurrencies using Monero\'s ring signature technology.' },
-    { q: 'How does privacy work?', a: 'We utilize Monero\'s ring signatures to mix your transaction with decoys, making it impossible to trace. Stealth addresses ensure recipient privacy, and RingCT hides amounts.' },
-    { q: 'Which wallets are supported?', a: 'Currently MetaMask for all EVM chains (Ethereum, Polygon, BSC, Arbitrum, Optimism, Avalanche) and Phantom for Solana.' },
-    { q: 'Is KYC required?', a: 'No. MoneroSwap never requires personal information. No email, no phone, no ID. Just connect your wallet.' },
-    { q: 'What tokens can I swap?', a: 'We support 20+ tokens including ETH, SOL, XMR, USDC, USDT, DAI, LINK, UNI, AAVE, WBTC, MATIC, and more.' },
-    { q: 'Are swaps instant?', a: 'Most EVM swaps complete in 1-5 minutes. Cross-chain swaps involving Monero may take 10-30 minutes due to confirmations.' },
-    { q: 'What are the fees?', a: 'MoneroSwap charges 0.3% swap fee plus standard network gas fees.' },
-    { q: 'Is MoneroSwap audited?', a: 'Yes, our smart contracts are audited by leading security firms. Reports are available in documentation.' },
+    { q: 'How is this different from Uniswap?', a: 'Uniswap is transparent; everyone sees your trades. MoneroSwap uses Ring Signatures to obfuscate the origin, amount, and destination of every swap.' },
+    { q: 'Do I need a Monero wallet?', a: 'No. You can swap directly from your MetaMask (ETH) or Phantom (SOL) wallet. We handle the Monero routing on the backend via atomic swaps.' },
+    { q: 'Is there a governance token?', a: 'Not yet. The protocol is currently immutable and governed by code. A DAO structure is planned for Q4 2026.' },
   ];
 
   return (
-    <section className="py-24">
-      <div className="container mx-auto px-4 max-w-3xl">
-        <AnimatedSection className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-white mb-4">Frequently Asked Questions</h2>
-          <p className="text-gray-400 text-lg">Everything you need to know about MoneroSwap</p>
-        </AnimatedSection>
+    <section className="py-32 border-t border-obsidian-900 bg-background">
+      <div className="container mx-auto px-6 max-w-3xl">
+        <FadeIn className="text-center mb-16">
+          <h2 className="text-4xl font-serif text-white mb-4">Common Questions</h2>
+        </FadeIn>
         
-        <div className="space-y-3">
+        <div className="space-y-4">
           {faqs.map((faq, i) => (
-            <AnimatedSection key={i} delay={i * 0.05}>
-              <div className="card overflow-hidden">
+            <FadeIn key={i} delay={i * 0.1}>
+              <div className="border-b border-obsidian-800 pb-4">
                 <button
                   onClick={() => setOpenIndex(openIndex === i ? null : i)}
-                  className="w-full flex items-center justify-between p-5 text-left hover:bg-obsidian-800/50 transition-colors"
+                  className="w-full flex items-center justify-between py-4 text-left hover:text-white transition-colors group"
                 >
-                  <span className="font-semibold text-white">{faq.q}</span>
+                  <span className="font-serif text-lg text-obsidian-200 group-hover:text-white">{faq.q}</span>
                   {openIndex === i ? (
-                    <ChevronUp className="w-5 h-5 text-monero-orange flex-shrink-0" />
+                    <ChevronUp className="w-4 h-4 text-white" />
                   ) : (
-                    <ChevronDown className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                    <ChevronDown className="w-4 h-4 text-obsidian-600" />
                   )}
                 </button>
                 <AnimatePresence>
@@ -410,13 +391,16 @@ function FAQSection() {
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.2 }}
+                      className="overflow-hidden"
                     >
-                      <div className="px-5 pb-5 text-gray-400">{faq.a}</div>
+                      <p className="pb-6 text-obsidian-400 text-sm leading-relaxed font-sans max-w-xl">
+                        {faq.a}
+                      </p>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </div>
-            </AnimatedSection>
+            </FadeIn>
           ))}
         </div>
       </div>
@@ -424,53 +408,14 @@ function FAQSection() {
   );
 }
 
-// CTA Section
-function CTASection() {
-  const [email, setEmail] = useState('');
-  
-  return (
-    <section className="py-24 relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-radial from-monero-orange/10 via-transparent to-transparent" />
-      
-      <div className="container mx-auto px-4 relative z-10">
-        <AnimatedSection className="text-center max-w-2xl mx-auto">
-          <h2 className="text-4xl font-bold text-white mb-4">Ready to Swap Privately?</h2>
-          <p className="text-gray-400 text-lg mb-8">
-            Join thousands of users who value their financial privacy
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-            <div className="relative flex-1">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-              <input
-                type="email"
-                placeholder="Enter your email for updates"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="input-field pl-12"
-              />
-            </div>
-            <button className="btn-primary whitespace-nowrap">Subscribe</button>
-          </div>
-          
-          <p className="text-gray-500 text-sm mt-4">
-            No spam. Unsubscribe anytime. Your email is never shared.
-          </p>
-        </AnimatedSection>
-      </div>
-    </section>
-  );
-}
+// === MAIN PAGE ===
 
-// Main Page
 export default function HomePage() {
   const [showWalletModal, setShowWalletModal] = useState(false);
   const { walletState } = useWalletStore();
 
   return (
-    <div className="min-h-screen flex flex-col relative">
-      <div className="scanline-overlay" />
-      
+    <div className="min-h-screen flex flex-col bg-background text-white selection:bg-white selection:text-black">
       <Header 
         onConnectWallet={() => setShowWalletModal(true)} 
         walletConnected={walletState.isConnected}
@@ -479,13 +424,11 @@ export default function HomePage() {
       />
 
       <main className="flex-1">
-        <HeroSection onLaunchApp={() => {}} />
-        <HowItWorksSection />
-        <TechnologySection />
-        <FeaturesSection />
-        <RoadmapSection />
+        <HeroSection onLaunchApp={() => setShowWalletModal(true)} />
+        <VisionSection />
+        <ArchitectureSection />
+        <FeatureGrid />
         <FAQSection />
-        <CTASection />
       </main>
 
       <Footer />

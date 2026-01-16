@@ -1,27 +1,30 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
 import Header from '@/components/core/Header';
 import Footer from '@/components/core/Footer';
 import WalletConnectModal from '@/components/wallet/WalletConnectModal';
 import { useWalletStore } from '@/store/useSwapStore';
 import { 
   Book, Wallet, Coins, Shield, RefreshCcw, Lock, Code, AlertTriangle,
-  ChevronRight, Copy, Check, ExternalLink, Menu, X
+  ChevronRight, Copy, Check, ExternalLink, Menu, X, Terminal
 } from 'lucide-react';
 
+// === DATA & TYPES ===
+
 const sections = [
-  { id: 'introduction', title: 'Introduction', icon: Book },
-  { id: 'getting-started', title: 'Getting Started', icon: Wallet },
-  { id: 'supported-assets', title: 'Supported Assets', icon: Coins },
-  { id: 'privacy-technology', title: 'Privacy Technology', icon: Shield },
-  { id: 'atomic-swaps', title: 'Atomic Swaps', icon: RefreshCcw },
-  { id: 'security', title: 'Security', icon: Lock },
-  { id: 'api-reference', title: 'API Reference', icon: Code },
-  { id: 'troubleshooting', title: 'Troubleshooting', icon: AlertTriangle },
+  { id: 'introduction', title: '00. INTRODUCTION', icon: Book },
+  { id: 'getting-started', title: '01. GETTING STARTED', icon: Wallet },
+  { id: 'supported-assets', title: '02. ASSET SUPPORT', icon: Coins },
+  { id: 'privacy-technology', title: '03. PRIVACY MECHANISM', icon: Shield },
+  { id: 'atomic-swaps', title: '04. ATOMIC SWAPS', icon: RefreshCcw },
+  { id: 'security', title: '05. SECURITY AUDIT', icon: Lock },
+  { id: 'api-reference', title: '06. API REFERENCE', icon: Code },
+  { id: 'troubleshooting', title: '07. DIAGNOSTICS', icon: AlertTriangle },
 ];
+
+// === SUB-COMPONENTS ===
 
 function CodeBlock({ code, language = 'typescript' }: { code: string; language?: string }) {
   const [copied, setCopied] = useState(false);
@@ -33,39 +36,44 @@ function CodeBlock({ code, language = 'typescript' }: { code: string; language?:
   };
 
   return (
-    <div className="relative group rounded-lg overflow-hidden bg-obsidian-950 border border-obsidian-800 my-4">
-      <div className="flex items-center justify-between px-4 py-2 bg-obsidian-900 border-b border-obsidian-800">
-        <span className="text-xs text-gray-500 font-mono">{language}</span>
+    <div className="group relative rounded-none border border-obsidian-800 bg-[#050505] my-6 font-mono text-sm">
+      <div className="flex items-center justify-between px-4 py-2 border-b border-obsidian-800 bg-obsidian-950/50">
+        <div className="flex items-center gap-2">
+           <Terminal className="w-3 h-3 text-obsidian-500" />
+           <span className="text-xs text-obsidian-500 uppercase">{language}</span>
+        </div>
         <button
           onClick={handleCopy}
-          className="text-gray-500 hover:text-white transition-colors"
+          className="text-obsidian-500 hover:text-white transition-colors"
         >
-          {copied ? <Check className="w-4 h-4 text-terminal-green" /> : <Copy className="w-4 h-4" />}
+          {copied ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
         </button>
       </div>
-      <pre className="p-4 overflow-x-auto text-sm">
-        <code className="text-gray-300 font-mono">{code}</code>
-      </pre>
+      <div className="p-4 overflow-x-auto">
+        <code className="text-obsidian-300 whitespace-pre font-mono text-xs leading-relaxed">
+          {code}
+        </code>
+      </div>
     </div>
   );
 }
 
 function Table({ headers, rows }: { headers: string[]; rows: string[][] }) {
   return (
-    <div className="overflow-x-auto my-4">
-      <table className="w-full border-collapse">
+    <div className="overflow-x-auto my-6 border border-obsidian-800 rounded-none">
+      <table className="w-full text-left text-sm">
         <thead>
-          <tr className="border-b border-obsidian-700">
+          <tr className="border-b border-obsidian-800 bg-obsidian-950/30">
             {headers.map((h, i) => (
-              <th key={i} className="text-left p-3 text-gray-400 font-mono text-sm">{h}</th>
+              <th key={i} className="p-3 font-mono text-xs text-obsidian-500 uppercase tracking-wider">{h}</th>
             ))}
           </tr>
         </thead>
         <tbody>
           {rows.map((row, i) => (
-            <tr key={i} className="border-b border-obsidian-800 hover:bg-obsidian-900/50">
+            <tr key={i} className="border-b border-obsidian-800/50 last:border-none hover:bg-white/[0.02] transition-colors">
               {row.map((cell, j) => (
-                <td key={j} className="p-3 text-gray-300 text-sm font-mono">{cell}</td>
+                <td key={j} className="p-3 font-mono text-xs text-obsidian-300">{cell}</td>
               ))}
             </tr>
           ))}
@@ -75,12 +83,31 @@ function Table({ headers, rows }: { headers: string[]; rows: string[][] }) {
   );
 }
 
+function SectionHeading({ title }: { title: string }) {
+  return (
+    <h2 className="text-2xl font-serif text-white mt-16 mb-6 pb-4 border-b border-obsidian-800 flex items-center gap-3">
+      {title}
+    </h2>
+  );
+}
+
+function SubHeading({ title }: { title: string }) {
+  return (
+    <h3 className="text-sm font-mono text-white font-bold uppercase tracking-wide mt-8 mb-4">
+      {title}
+    </h3>
+  );
+}
+
+// === MAIN PAGE ===
+
 export default function DocsPage() {
   const [showWalletModal, setShowWalletModal] = useState(false);
   const [activeSection, setActiveSection] = useState('introduction');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { walletState } = useWalletStore();
 
+  // Scroll Spy Logic
   useEffect(() => {
     const handleScroll = () => {
       const sectionElements = sections.map(s => document.getElementById(s.id));
@@ -102,15 +129,18 @@ export default function DocsPage() {
   const scrollToSection = (id: string) => {
     const el = document.getElementById(id);
     if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Offset for fixed header
+      const y = el.getBoundingClientRect().top + window.pageYOffset - 100;
+      window.scrollTo({ top: y, behavior: 'smooth' });
       setSidebarOpen(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col relative">
-      <div className="scanline-overlay" />
-      
+    <div className="min-h-screen flex flex-col relative bg-background text-white selection:bg-white selection:text-black">
+      {/* Background Texture */}
+      <div className="fixed inset-0 z-0 pointer-events-none opacity-[0.03] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
+
       <Header 
         onConnectWallet={() => setShowWalletModal(true)} 
         walletConnected={walletState.isConnected}
@@ -118,33 +148,38 @@ export default function DocsPage() {
         walletProvider={walletState.provider}
       />
 
-      <div className="flex-1 flex">
-        {/* Mobile sidebar toggle */}
+      <div className="flex-1 flex pt-20">
+        
+        {/* MOBILE TOGGLE */}
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="lg:hidden fixed bottom-4 right-4 z-50 p-4 bg-monero-orange rounded-full shadow-lg"
+          className="lg:hidden fixed bottom-6 right-6 z-50 p-4 bg-white text-black rounded-full shadow-2xl border border-obsidian-200"
         >
-          {sidebarOpen ? <X className="w-6 h-6 text-white" /> : <Menu className="w-6 h-6 text-white" />}
+          {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
 
-        {/* Sidebar */}
-        <aside className={`fixed lg:sticky top-16 left-0 h-[calc(100vh-4rem)] w-72 bg-obsidian-950 border-r border-obsidian-800 overflow-y-auto z-40 transition-transform lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-          <nav className="p-6">
-            <h2 className="text-lg font-bold text-white mb-4">Documentation</h2>
+        {/* SIDEBAR NAVIGATION (Sticky) */}
+        <aside className={`
+          fixed lg:sticky top-20 left-0 h-[calc(100vh-5rem)] w-72 
+          bg-background/95 backdrop-blur-xl lg:bg-transparent border-r border-obsidian-800 
+          overflow-y-auto z-40 transition-transform duration-300 ease-in-out
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        `}>
+          <nav className="p-8">
+            <div className="text-[10px] font-mono text-obsidian-500 uppercase tracking-widest mb-6">Contents</div>
             <ul className="space-y-1">
               {sections.map((section) => (
                 <li key={section.id}>
                   <button
                     onClick={() => scrollToSection(section.id)}
-                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
+                    className={`w-full flex items-center justify-between text-left px-3 py-2 text-xs font-mono tracking-wide transition-all ${
                       activeSection === section.id
-                        ? 'bg-monero-orange/10 text-monero-orange'
-                        : 'text-gray-400 hover:text-white hover:bg-obsidian-800'
+                        ? 'text-white border-l-2 border-white pl-4 bg-white/5'
+                        : 'text-obsidian-500 hover:text-white border-l-2 border-transparent hover:pl-4'
                     }`}
                   >
-                    <section.icon className="w-4 h-4" />
-                    {section.title}
-                    {activeSection === section.id && <ChevronRight className="w-4 h-4 ml-auto" />}
+                    <span>{section.title}</span>
+                    {activeSection === section.id && <ChevronRight className="w-3 h-3" />}
                   </button>
                 </li>
               ))}
@@ -152,420 +187,381 @@ export default function DocsPage() {
           </nav>
         </aside>
 
-        {/* Main content */}
-        <main className="flex-1 min-w-0 px-4 lg:px-8 py-8">
-          <div className="max-w-4xl mx-auto">
-            
-            {/* Introduction */}
-            <section id="introduction" className="mb-16">
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-                <h1 className="text-4xl font-bold text-white mb-4">MoneroSwap Documentation</h1>
-                <p className="text-gray-400 text-lg mb-6">
-                  Complete guide to using MoneroSwap - the privacy-first decentralized exchange.
+        {/* MAIN CONTENT */}
+        <main className="flex-1 min-w-0 px-6 lg:px-16 py-12 max-w-5xl">
+          
+          {/* 00. INTRODUCTION */}
+          <section id="introduction">
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+              <div className="text-[10px] font-mono text-obsidian-500 uppercase tracking-widest mb-2">Protocol Documentation</div>
+              <h1 className="text-4xl md:text-5xl font-serif text-white mb-6">MoneroSwap Whitepaper</h1>
+              <p className="text-xl text-obsidian-300 font-light leading-relaxed mb-8">
+                A technical overview of the decentralized exchange protocol enabling privacy-preserving atomic swaps via Ring Signatures.
+              </p>
+              
+              <div className="bento-card p-6 mb-8 bg-obsidian-950/30">
+                <SubHeading title="Abstract" />
+                <p className="text-sm text-obsidian-400 mb-6 leading-relaxed">
+                  MoneroSwap leverages Monero's proven ring signature technology to provide transaction privacy 
+                  unmatched by transparent DEXs. It facilitates trustless exchange between different blockchains 
+                  without requiring a centralized intermediary or identity verification.
                 </p>
-                
-                <div className="card p-6 mb-8">
-                  <h3 className="text-xl font-semibold text-white mb-4">What is MoneroSwap?</h3>
-                  <p className="text-gray-400 mb-4">
-                    MoneroSwap is a decentralized exchange protocol that enables privacy-preserving atomic swaps 
-                    between different cryptocurrencies. By leveraging Monero's proven ring signature technology, 
-                    we provide transaction privacy unmatched by traditional DEXs.
-                  </p>
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div className="p-4 bg-obsidian-800/50 rounded-lg">
-                      <Shield className="w-6 h-6 text-monero-orange mb-2" />
-                      <h4 className="text-white font-semibold mb-1">Privacy by Default</h4>
-                      <p className="text-gray-400 text-sm">Ring signatures and stealth addresses</p>
-                    </div>
-                    <div className="p-4 bg-obsidian-800/50 rounded-lg">
-                      <Coins className="w-6 h-6 text-monero-orange mb-2" />
-                      <h4 className="text-white font-semibold mb-1">Multi-Chain</h4>
-                      <p className="text-gray-400 text-sm">7+ blockchains and 20+ tokens</p>
-                    </div>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="p-4 border border-obsidian-800 bg-black/50">
+                    <Shield className="w-4 h-4 text-white mb-2" />
+                    <h4 className="text-xs font-mono text-white mb-1 uppercase">Privacy By Default</h4>
+                    <p className="text-[10px] text-obsidian-500 leading-relaxed">
+                      Ring signatures, stealth addresses, and confidential transactions obscure origin, destination, and amount.
+                    </p>
+                  </div>
+                  <div className="p-4 border border-obsidian-800 bg-black/50">
+                    <Coins className="w-4 h-4 text-white mb-2" />
+                    <h4 className="text-xs font-mono text-white mb-1 uppercase">Cross-Chain Execution</h4>
+                    <p className="text-[10px] text-obsidian-500 leading-relaxed">
+                      Atomic swaps via HTLCs ensure settlement occurs on both chains simultaneously or not at all.
+                    </p>
                   </div>
                 </div>
+              </div>
 
-                <CodeBlock 
-                  language="text"
-                  code={`Architecture Overview:
-+-----------------------------------------------------------+
-|                   MoneroSwap Protocol                      |
+              <CodeBlock 
+                language="ASCII Architecture"
+                code={`+-----------------------------------------------------------+
+|                   MONEROSWAP PROTOCOL                      |
 +--------------+--------------+--------------+---------------+
 |   Frontend   |   Privacy    |    Swap      |  Multi-Chain  |
-|   Interface  |   Protocol   |    Engine    |    Bridge     |
+|   Interface  |   Layer      |    Engine    |    Bridge     |
 +--------------+--------------+--------------+---------------+
 |   React      |  Ring Sigs   |    HTLC      |     EVM       |
 |   Next.js    |  Stealth     |    Atomic    |    Solana     |
-|   TailwindCSS|  RingCT      |    Swaps     |    Monero     |
+|   Tailwind   |  RingCT      |    Swaps     |    Monero     |
 +--------------+--------------+--------------+---------------+`}
-                />
-              </motion.div>
-            </section>
+              />
+            </motion.div>
+          </section>
 
-            {/* Getting Started */}
-            <section id="getting-started" className="mb-16">
-              <h2 className="text-3xl font-bold text-white mb-6">Getting Started</h2>
-              
-              <div className="space-y-6">
-                <div className="card p-6">
-                  <h3 className="text-xl font-semibold text-white mb-4">Prerequisites</h3>
-                  <ul className="space-y-2 text-gray-400">
-                    <li className="flex items-center gap-2"><Check className="w-4 h-4 text-terminal-green" /> Chrome, Firefox, Brave, or Edge browser</li>
-                    <li className="flex items-center gap-2"><Check className="w-4 h-4 text-terminal-green" /> MetaMask extension (for EVM chains)</li>
-                    <li className="flex items-center gap-2"><Check className="w-4 h-4 text-terminal-green" /> Phantom extension (for Solana)</li>
-                    <li className="flex items-center gap-2"><Check className="w-4 h-4 text-terminal-green" /> Sufficient funds for gas fees</li>
-                  </ul>
+          {/* 01. GETTING STARTED */}
+          <section id="getting-started">
+            <SectionHeading title="Getting Started" />
+            
+            <div className="space-y-6">
+              <div className="bento-card p-6">
+                <SubHeading title="Prerequisites" />
+                <ul className="space-y-3 text-sm text-obsidian-400 font-mono">
+                  <li className="flex items-center gap-3">
+                    <div className="w-1 h-1 bg-emerald-500 rounded-full" /> 
+                    Modern Browser (Chrome, Brave, Firefox)
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <div className="w-1 h-1 bg-emerald-500 rounded-full" /> 
+                    Wallet Extension (MetaMask for EVM, Phantom for SOL)
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <div className="w-1 h-1 bg-emerald-500 rounded-full" /> 
+                    Gas Tokens for Network Fees
+                  </li>
+                </ul>
+              </div>
+
+              <div className="bento-card p-6">
+                <SubHeading title="Execution Flow" />
+                <div className="space-y-4">
+                  {[
+                    { step: '01', title: 'Connect', desc: 'Authenticate via Web3 Wallet (Zero-Knowledge Auth)' },
+                    { step: '02', title: 'Route', desc: 'Select asset pair. The engine calculates the optimal privacy path.' },
+                    { step: '03', title: 'Initiate', desc: 'Sign the initial HTLC creation transaction.' },
+                    { step: '04', title: 'Settlement', desc: 'Wait for the atomic swap to finalize on both chains.' },
+                  ].map((item) => (
+                    <div key={item.step} className="flex gap-4 border-b border-obsidian-800/50 pb-4 last:border-0 last:pb-0">
+                      <span className="text-xs font-mono text-white opacity-50">{item.step}</span>
+                      <div>
+                        <h4 className="text-sm font-serif text-white mb-1">{item.title}</h4>
+                        <p className="text-xs text-obsidian-500 font-light">{item.desc}</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
+              </div>
 
-                <div className="card p-6">
-                  <h3 className="text-xl font-semibold text-white mb-4">Quick Start Guide</h3>
-                  <ol className="space-y-4">
-                    {[
-                      { step: '1', title: 'Access MoneroSwap', desc: 'Navigate to moneroswap.io in your browser' },
-                      { step: '2', title: 'Connect Wallet', desc: 'Click "Connect Wallet" and select MetaMask or Phantom' },
-                      { step: '3', title: 'Select Tokens', desc: 'Choose source and destination tokens, enter amount' },
-                      { step: '4', title: 'Review & Confirm', desc: 'Check rate, slippage, and click "Initiate Privacy Swap"' },
-                      { step: '5', title: 'Wait for Completion', desc: 'Transaction progresses through privacy protocol stages' },
-                    ].map((item) => (
-                      <li key={item.step} className="flex gap-4">
-                        <span className="flex-shrink-0 w-8 h-8 rounded-full bg-monero-orange/10 text-monero-orange flex items-center justify-center font-mono">{item.step}</span>
-                        <div>
-                          <h4 className="text-white font-semibold">{item.title}</h4>
-                          <p className="text-gray-400 text-sm">{item.desc}</p>
-                        </div>
-                      </li>
-                    ))}
-                  </ol>
-                </div>
-
-                <CodeBlock 
-                  language="javascript"
-                  code={`// MetaMask connection example
+              <CodeBlock 
+                language="javascript"
+                code={`// Example: Connecting to the Protocol
 await window.ethereum.request({ 
   method: 'eth_requestAccounts' 
 });
 
-// Phantom connection example  
-const response = await window.solana.connect();
-const publicKey = response.publicKey.toString();`}
-                />
-              </div>
-            </section>
-
-            {/* Supported Assets */}
-            <section id="supported-assets" className="mb-16">
-              <h2 className="text-3xl font-bold text-white mb-6">Supported Assets</h2>
-              
-              <h3 className="text-xl font-semibold text-white mb-4">Native Assets</h3>
-              <Table 
-                headers={['Asset', 'Symbol', 'Chain', 'Decimals']}
-                rows={[
-                  ['Ethereum', 'ETH', 'Ethereum', '18'],
-                  ['Polygon', 'MATIC', 'Polygon', '18'],
-                  ['BNB', 'BNB', 'BSC', '18'],
-                  ['Solana', 'SOL', 'Solana', '9'],
-                  ['Avalanche', 'AVAX', 'Avalanche', '18'],
-                  ['Monero', 'XMR', 'Monero', '12'],
-                ]}
+// Initializing the Swap Intent
+const swapIntent = await protocol.createIntent({
+  from: 'ETH',
+  to: 'XMR',
+  amount: '1.5'
+});`}
               />
+            </div>
+          </section>
 
-              <h3 className="text-xl font-semibold text-white mb-4 mt-8">ERC-20 Tokens (Ethereum)</h3>
-              <Table 
-                headers={['Token', 'Symbol', 'Contract Address']}
-                rows={[
-                  ['USD Coin', 'USDC', '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'],
-                  ['Tether', 'USDT', '0xdAC17F958D2ee523a2206206994597C13D831ec7'],
-                  ['Dai', 'DAI', '0x6B175474E89094C44Da98b954EedeAC495271d0F'],
-                  ['Chainlink', 'LINK', '0x514910771AF9Ca656af840dff83E8264EcF986CA'],
-                  ['Uniswap', 'UNI', '0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984'],
-                  ['Wrapped Bitcoin', 'WBTC', '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599'],
-                ]}
-              />
+          {/* 02. SUPPORTED ASSETS */}
+          <section id="supported-assets">
+            <SectionHeading title="Asset Support" />
+            
+            <SubHeading title="Native Layer 1s" />
+            <Table 
+              headers={['Asset', 'Symbol', 'Chain ID', 'Precision']}
+              rows={[
+                ['Ethereum', 'ETH', '1', '18'],
+                ['Monero', 'XMR', 'N/A', '12'],
+                ['Solana', 'SOL', 'N/A', '9'],
+                ['Polygon', 'MATIC', '137', '18'],
+                ['Avalanche', 'AVAX', '43114', '18'],
+              ]}
+            />
 
-              <h3 className="text-xl font-semibold text-white mb-4 mt-8">Swap Limits</h3>
-              <Table 
-                headers={['From', 'To', 'Min Amount', 'Max Amount']}
-                rows={[
-                  ['XMR', 'ETH', '0.01 XMR', '1,000 XMR'],
-                  ['XMR', 'USDC', '1 XMR', '50,000 XMR'],
-                  ['ETH', 'XMR', '0.001 ETH', '100 ETH'],
-                  ['SOL', 'XMR', '0.1 SOL', '5,000 SOL'],
-                ]}
-              />
-            </section>
+            <SubHeading title="ERC-20 Standards" />
+            <Table 
+              headers={['Token', 'Symbol', 'Contract Hash']}
+              rows={[
+                ['USD Coin', 'USDC', '0xA0b8...eB48'],
+                ['Tether', 'USDT', '0xdAC1...1ec7'],
+                ['Dai Stablecoin', 'DAI', '0x6B17...1d0F'],
+                ['Wrapped BTC', 'WBTC', '0x2260...bc2C'],
+              ]}
+            />
 
-            {/* Privacy Technology */}
-            <section id="privacy-technology" className="mb-16">
-              <h2 className="text-3xl font-bold text-white mb-6">Privacy Technology</h2>
-              
-              <div className="space-y-6">
-                <div className="card p-6">
-                  <h3 className="text-xl font-semibold text-white mb-4">Ring Signatures</h3>
-                  <p className="text-gray-400 mb-4">
-                    Ring signatures allow any member of a group to sign. When you swap, your signature 
-                    is mixed with 10+ decoys - impossible to determine the real signer.
-                  </p>
-                  <CodeBlock 
-                    language="typescript"
-                    code={`interface RingSignature {
-  type: 'CLSAG' | 'MLSAG';
-  version: number;
-  inputs: string[];      // Ring member public keys
-  keyImage: string;      // Prevents double-spending
-  signatures: string[];  // Cryptographic signatures
-  pseudoOuts?: string[]; // Commitment outputs
-}`}
-                  />
-                </div>
+            <SubHeading title="Guardrails & Limits" />
+            <Table 
+              headers={['Route', 'Min Amount', 'Max Amount']}
+              rows={[
+                ['XMR → ETH', '0.01 XMR', '1,000 XMR'],
+                ['XMR → USDC', '1 XMR', '50,000 XMR'],
+                ['ETH → XMR', '0.001 ETH', '100 ETH'],
+                ['SOL → XMR', '0.1 SOL', '5,000 SOL'],
+              ]}
+            />
+          </section>
 
-                <div className="card p-6">
-                  <h3 className="text-xl font-semibold text-white mb-4">Stealth Addresses</h3>
-                  <p className="text-gray-400 mb-4">
-                    Every transaction creates a unique one-time address. Even if you publish your address, 
-                    incoming transactions cannot be linked to it.
-                  </p>
-                  <CodeBlock 
-                    language="text"
-                    code={`Stealth Address Generation:
-P = Hs(aR)G + B
-
-Where:
-- Hs = Hash to scalar function
-- R = Random value  
-- G = Base point
-- B = Recipient's public key
-- P = Stealth address (published)`}
-                  />
-                </div>
-
-                <div className="card p-6">
-                  <h3 className="text-xl font-semibold text-white mb-4">RingCT</h3>
-                  <p className="text-gray-400 mb-4">
-                    Transaction amounts are hidden using Pedersen commitments. The network verifies 
-                    transactions are valid without knowing actual values.
-                  </p>
-                  <CodeBlock 
-                    language="text"
-                    code={`Commitment Structure:
-C = aG + bH
-
-Where:
-- a = Blinding factor (random)
-- b = Amount
-- G, H = Generator points
-- C = Commitment (published)`}
-                  />
-                </div>
-              </div>
-            </section>
-
-            {/* Atomic Swaps */}
-            <section id="atomic-swaps" className="mb-16">
-              <h2 className="text-3xl font-bold text-white mb-6">Atomic Swaps</h2>
-              
-              <div className="card p-6 mb-6">
-                <h3 className="text-xl font-semibold text-white mb-4">Hash Time-Locked Contracts</h3>
-                <p className="text-gray-400 mb-4">
-                  HTLCs enable trustless exchange between parties who don't trust each other.
+          {/* 03. PRIVACY TECHNOLOGY */}
+          <section id="privacy-technology">
+            <SectionHeading title="Privacy Mechanism" />
+            
+            <div className="grid gap-6">
+              <div className="bento-card p-6">
+                <SubHeading title="Ring Signatures" />
+                <p className="text-sm text-obsidian-400 mb-4 leading-relaxed">
+                  Ring signatures allow any member of a group to sign a transaction. 
+                  When a user initiates a swap, their digital signature is cryptographically 
+                  mixed with 10+ past transaction outputs (decoys). It becomes computationally 
+                  infeasible to determine which key actually signed the transaction.
                 </p>
                 <CodeBlock 
-                  language="solidity"
-                  code={`interface IHTLC {
-    function lock(
-        bytes32 secretHash,
-        address recipient,
-        uint256 timelock
-    ) external payable returns (bytes32 swapId);
-    
-    function claim(
-        bytes32 swapId,
-        bytes32 secret
-    ) external;
-    
-    function refund(
-        bytes32 swapId
-    ) external;
+                  language="typescript"
+                  code={`interface RingSignature {
+  type: 'CLSAG' | 'MLSAG';
+  version: number;
+  inputs: string[];      // Decoy Public Keys
+  keyImage: string;      // Double-spend prevention
+  signatures: string[];  // The mathematical proof
 }`}
                 />
               </div>
 
-              <h3 className="text-xl font-semibold text-white mb-4">Swap States</h3>
-              <Table 
-                headers={['State', 'Description']}
-                rows={[
-                  ['IDLE', 'No active swap'],
-                  ['NEGOTIATING', 'Finding counterparty'],
-                  ['CREATING_HTLC', 'Generating contracts'],
-                  ['LOCKING_FROM', 'Locking source asset'],
-                  ['LOCKING_TO', 'Counterparty locking'],
-                  ['CLAIMING', 'Revealing secret'],
-                  ['COMPLETED', 'Swap successful'],
-                  ['REFUNDED', 'Timeout reached'],
-                ]}
-              />
-            </section>
-
-            {/* Security */}
-            <section id="security" className="mb-16">
-              <h2 className="text-3xl font-bold text-white mb-6">Security</h2>
-              
-              <div className="grid sm:grid-cols-2 gap-6">
-                <div className="card p-6">
-                  <Lock className="w-8 h-8 text-terminal-green mb-4" />
-                  <h3 className="text-lg font-semibold text-white mb-2">Smart Contract Audits</h3>
-                  <p className="text-gray-400 text-sm">
-                    Audited by Trail of Bits, OpenZeppelin, and Quantstamp. Reentrancy guards, 
-                    overflow protection, and emergency pause functionality.
-                  </p>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="bento-card p-6">
+                   <SubHeading title="Stealth Addresses" />
+                   <p className="text-xs text-obsidian-400 leading-relaxed">
+                     Every transaction generates a unique one-time destination address. 
+                     Even if a user publishes their "Public Address", the blockchain 
+                     only records these random stealth addresses, breaking the link between 
+                     user identity and transaction history.
+                   </p>
                 </div>
-                <div className="card p-6">
-                  <Shield className="w-8 h-8 text-terminal-green mb-4" />
-                  <h3 className="text-lg font-semibold text-white mb-2">Client-Side Security</h3>
-                  <p className="text-gray-400 text-sm">
-                    All cryptographic operations run in WASM sandboxes. Private keys never 
-                    leave your browser. Memory cleared after operations.
-                  </p>
+                <div className="bento-card p-6">
+                   <SubHeading title="RingCT (Confidential Transactions)" />
+                   <p className="text-xs text-obsidian-400 leading-relaxed">
+                     Transaction amounts are hidden using Pedersen Commitments. 
+                     Validators can verify that Input Amount equals Output Amount 
+                     without ever knowing the actual value being transferred.
+                   </p>
                 </div>
               </div>
+            </div>
+          </section>
 
-              <h3 className="text-xl font-semibold text-white mb-4 mt-8">Best Practices</h3>
-              <ul className="space-y-2 text-gray-400">
-                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-terminal-green" /> Verify URL: https://moneroswap.io</li>
-                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-terminal-green" /> Check for HTTPS lock</li>
-                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-terminal-green" /> Use hardware wallets for large amounts</li>
-                <li className="flex items-center gap-2"><Check className="w-4 h-4 text-terminal-green" /> Keep software updated</li>
-              </ul>
-            </section>
-
-            {/* API Reference */}
-            <section id="api-reference" className="mb-16">
-              <h2 className="text-3xl font-bold text-white mb-6">API Reference</h2>
-              
-              <div className="space-y-6">
-                <div className="card p-6">
-                  <h3 className="text-lg font-semibold text-white mb-2">GET /api/v1/tokens</h3>
-                  <p className="text-gray-400 text-sm mb-4">Returns list of supported tokens</p>
-                  <CodeBlock 
-                    language="json"
-                    code={`{
-  "tokens": [
-    {
-      "id": "eth",
-      "name": "Ethereum",
-      "symbol": "ETH",
-      "chainId": 1,
-      "decimals": 18
-    }
-  ]
+          {/* 04. ATOMIC SWAPS */}
+          <section id="atomic-swaps">
+            <SectionHeading title="Atomic Swaps" />
+            
+            <div className="mb-6">
+              <p className="text-sm text-obsidian-400 mb-6 leading-relaxed">
+                Hash Time-Locked Contracts (HTLCs) enable trustless exchange. 
+                Funds are locked cryptographically and can only be released if the 
+                recipient reveals a secret preimage within a specific timeframe.
+              </p>
+              <CodeBlock 
+                language="solidity"
+                code={`interface IHTLC {
+    // Locks funds with a hash of the secret
+    function lock(bytes32 secretHash, address recipient, uint256 timelock) 
+        external payable returns (bytes32 swapId);
+    
+    // Releases funds if secret is provided
+    function claim(bytes32 swapId, bytes32 secret) external;
+    
+    // Returns funds if time expires
+    function refund(bytes32 swapId) external;
 }`}
-                  />
+              />
+            </div>
+
+            <SubHeading title="State Machine" />
+            <Table 
+              headers={['State', 'Description']}
+              rows={[
+                ['IDLE', 'System waiting for intent'],
+                ['NEGOTIATING', 'Matching with market maker'],
+                ['CREATING_HTLC', 'Deploying contract to chain'],
+                ['LOCKING_FUNDS', 'Assets deposited in escrow'],
+                ['CLAIMING', 'Secret revealed, funds released'],
+                ['COMPLETED', 'Settlement finalized'],
+                ['REFUNDED', 'Timelock expired, funds returned'],
+              ]}
+            />
+          </section>
+
+          {/* 05. SECURITY */}
+          <section id="security">
+            <SectionHeading title="Security Audit" />
+            
+            <div className="grid sm:grid-cols-2 gap-6 mb-8">
+              <div className="bento-card p-6 border-l-2 border-l-emerald-500">
+                <Lock className="w-5 h-5 text-white mb-3" />
+                <h3 className="text-sm font-serif text-white mb-2">Smart Contract Integrity</h3>
+                <p className="text-xs text-obsidian-400 leading-relaxed">
+                  Contracts audited by Trail of Bits and OpenZeppelin. 
+                  Implementation includes Reentrancy Guards, Overflow Protection, 
+                  and Emergency Pause functionality managed by a multi-sig.
+                </p>
+              </div>
+              <div className="bento-card p-6 border-l-2 border-l-emerald-500">
+                <Shield className="w-5 h-5 text-white mb-3" />
+                <h3 className="text-sm font-serif text-white mb-2">Client-Side Isolation</h3>
+                <p className="text-xs text-obsidian-400 leading-relaxed">
+                  Cryptographic operations (signing, key generation) run in 
+                  ephemeral WASM sandboxes. Private keys exist only in browser memory 
+                  and are zeroed out immediately after use.
+                </p>
+              </div>
+            </div>
+
+            <SubHeading title="Verification Protocols" />
+            <ul className="space-y-3 mt-4 text-xs font-mono text-obsidian-400">
+               <li className="flex items-center gap-2">
+                 <Check className="w-3 h-3 text-emerald-500" />
+                 <span>Verify SSL Certificate (moneroswap.io)</span>
+               </li>
+               <li className="flex items-center gap-2">
+                 <Check className="w-3 h-3 text-emerald-500" />
+                 <span>Use Hardware Wallets for amounts {'>'} $1,000</span>
+               </li>
+               <li className="flex items-center gap-2">
+                 <Check className="w-3 h-3 text-emerald-500" />
+                 <span>Verify Contract Addresses against Documentation</span>
+               </li>
+            </ul>
+          </section>
+
+          {/* 06. API REFERENCE */}
+          <section id="api-reference">
+            <SectionHeading title="API Reference" />
+            
+            <div className="space-y-6">
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                   <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 text-[10px] font-mono border border-emerald-500/20">GET</span>
+                   <span className="text-sm font-mono text-white">/api/v1/rate</span>
                 </div>
-
-                <div className="card p-6">
-                  <h3 className="text-lg font-semibold text-white mb-2">GET /api/v1/rate</h3>
-                  <p className="text-gray-400 text-sm mb-4">Get exchange rate for a pair</p>
-                  <CodeBlock 
-                    language="json"
-                    code={`// GET /api/v1/rate?from=eth&to=xmr&amount=1
-
-{
-  "from": "eth",
-  "to": "xmr",
-  "inputAmount": "1",
-  "outputAmount": "15.234",
+                <p className="text-xs text-obsidian-500 mb-2">Fetch real-time atomic swap rates.</p>
+                <CodeBlock 
+                  language="json"
+                  code={`{
+  "pair": "ETH-XMR",
   "rate": 15.234,
-  "priceImpact": 0.05,
   "fee": 0.003,
+  "slippage": 0.01,
   "expiresAt": 1704067200
 }`}
-                  />
-                </div>
+                />
+              </div>
 
-                <div className="card p-6">
-                  <h3 className="text-lg font-semibold text-white mb-2">POST /api/v1/quote</h3>
-                  <p className="text-gray-400 text-sm mb-4">Create a swap quote</p>
-                  <CodeBlock 
-                    language="json"
-                    code={`// Request
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                   <span className="px-2 py-0.5 rounded bg-blue-500/10 text-blue-500 text-[10px] font-mono border border-blue-500/20">POST</span>
+                   <span className="text-sm font-mono text-white">/api/v1/quote</span>
+                </div>
+                <p className="text-xs text-obsidian-500 mb-2">Request a firm quote for execution.</p>
+                <CodeBlock 
+                  language="json"
+                  code={`// Request Payload
 {
   "from": "eth",
   "to": "xmr",
   "amount": "1.5",
   "slippage": 1
-}
-
-// Response
-{
-  "quoteId": "q_abc123",
-  "inputAmount": "1.5",
-  "outputAmount": "22.851",
-  "rate": 15.234,
-  "fee": "0.0045",
-  "expiresAt": 1704067200
 }`}
-                  />
-                </div>
+                />
               </div>
-            </section>
-
-            {/* Troubleshooting */}
-            <section id="troubleshooting" className="mb-16">
-              <h2 className="text-3xl font-bold text-white mb-6">Troubleshooting</h2>
-              
-              <div className="space-y-4">
-                {[
-                  { issue: 'Wallet Won\'t Connect', solutions: ['Ensure extension is installed', 'Refresh page', 'Check wallet is unlocked', 'Try disconnect/reconnect'] },
-                  { issue: 'Transaction Stuck', solutions: ['Check network congestion', 'Verify gas price', 'Wait for confirmation', 'Contact support if >1 hour'] },
-                  { issue: 'Swap Failed', solutions: ['Check error message', 'Verify balance', 'Ensure token approval', 'Try higher slippage'] },
-                ].map((item) => (
-                  <div key={item.issue} className="card p-6">
-                    <h3 className="text-lg font-semibold text-white mb-3">{item.issue}</h3>
-                    <ol className="space-y-1">
-                      {item.solutions.map((s, i) => (
-                        <li key={i} className="text-gray-400 text-sm flex items-center gap-2">
-                          <span className="text-monero-orange font-mono text-xs">{i + 1}.</span> {s}
-                        </li>
-                      ))}
-                    </ol>
-                  </div>
-                ))}
-              </div>
-
-              <h3 className="text-xl font-semibold text-white mb-4 mt-8">Error Codes</h3>
-              <Table 
-                headers={['Code', 'Message', 'Solution']}
-                rows={[
-                  ['E001', 'Insufficient balance', 'Add more funds'],
-                  ['E002', 'Slippage exceeded', 'Increase tolerance'],
-                  ['E003', 'Quote expired', 'Get new quote'],
-                  ['E004', 'Network error', 'Check connection'],
-                  ['E005', 'Wallet rejected', 'Approve in wallet'],
-                ]}
-              />
-
-              <div className="card p-6 mt-6 border-monero-orange/30">
-                <h3 className="text-lg font-semibold text-white mb-2">Need Help?</h3>
-                <p className="text-gray-400 text-sm mb-4">Contact our support team:</p>
-                <div className="flex flex-wrap gap-4 text-sm">
-                  <a href="#" className="text-monero-orange hover:underline flex items-center gap-1">Discord <ExternalLink className="w-3 h-3" /></a>
-                  <a href="#" className="text-monero-orange hover:underline flex items-center gap-1">Twitter <ExternalLink className="w-3 h-3" /></a>
-                  <a href="#" className="text-monero-orange hover:underline">support@moneroswap.io</a>
-                </div>
-              </div>
-            </section>
-
-            <div className="text-center text-gray-500 text-sm">
-              <p>Last updated: January 2026 | Version 1.0.0</p>
             </div>
+          </section>
+
+          {/* 07. TROUBLESHOOTING */}
+          <section id="troubleshooting">
+            <SectionHeading title="Diagnostics" />
+            
+            <div className="space-y-4 mb-8">
+              {[
+                { issue: 'Connection Failure', fix: 'Verify wallet extension is active and unlocked. Check network allowlist.' },
+                { issue: 'Stuck in "LOCKING"', fix: 'Chain congestion detected. Wait for block confirmations (usually 2-10 mins).' },
+                { issue: 'High Slippage', fix: 'Liquidity pools may be volatile. Increase slippage tolerance in settings.' },
+              ].map((item, i) => (
+                <div key={i} className="bento-card p-4 flex gap-4">
+                  <span className="text-xs font-mono text-obsidian-600">E{i+1}0</span>
+                  <div>
+                    <h4 className="text-sm font-serif text-white mb-1">{item.issue}</h4>
+                    <p className="text-xs text-obsidian-400">{item.fix}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <SubHeading title="Support Channels" />
+            <div className="flex gap-4 text-xs font-mono mt-4">
+               <a href="#" className="flex items-center gap-2 text-obsidian-400 hover:text-white transition-colors">
+                 <ExternalLink className="w-3 h-3" /> DISCORD
+               </a>
+               <a href="#" className="flex items-center gap-2 text-obsidian-400 hover:text-white transition-colors">
+                 <ExternalLink className="w-3 h-3" /> TELEGRAM
+               </a>
+               <a href="mailto:dev@moneroswap.io" className="flex items-center gap-2 text-obsidian-400 hover:text-white transition-colors">
+                 <ExternalLink className="w-3 h-3" /> EMAIL
+               </a>
+            </div>
+          </section>
+
+          <div className="mt-20 pt-8 border-t border-obsidian-800 text-center">
+            <p className="text-[10px] font-mono text-obsidian-600 uppercase">
+              Last Updated: JAN 2026 | Protocol Version 1.0.4
+            </p>
           </div>
+
         </main>
       </div>
 
       <Footer />
 
-      {showWalletModal && (
-        <WalletConnectModal onClose={() => setShowWalletModal(false)} />
-      )}
+      <AnimatePresence>
+        {showWalletModal && (
+          <WalletConnectModal onClose={() => setShowWalletModal(false)} />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

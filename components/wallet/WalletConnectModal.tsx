@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { X, ExternalLink, Copy, Check, Wallet, Shield } from 'lucide-react';
+import { X, ExternalLink, Copy, ShieldCheck, Wallet, Key, Zap, AlertCircle } from 'lucide-react';
 import { useWalletStore } from '@/store/useSwapStore';
 import { WalletProviderType } from '@/types';
-import { isEvmChain, isSolanaChain, WALLET_LINKS, SUPPORTED_CHAINS } from '@/lib/constants';
+import { WALLET_LINKS, SUPPORTED_CHAINS } from '@/lib/constants';
 
 interface WalletConnectModalProps {
   onClose: () => void;
@@ -14,52 +14,36 @@ interface WalletConnectModalProps {
 interface WalletOption {
   id: WalletProviderType;
   name: string;
-  icon: React.ReactNode;
-  description: string;
-  connection: string;
-  chainType: 'EVM' | 'SOLANA' | 'BOTH';
+  type: string;
+  chainType: 'EVM' | 'SOLANA';
 }
 
 const walletOptions: WalletOption[] = [
   {
     id: 'METAMASK',
     name: 'MetaMask',
-    icon: (
-      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-bold text-sm">
-        MM
-      </div>
-    ),
-    description: 'Connect Ethereum, BSC, Polygon, and other EVM chains',
-    connection: 'Browser Extension / Mobile App',
+    type: 'EVM STANDARD',
     chainType: 'EVM',
   },
   {
     id: 'PHANTOM',
     name: 'Phantom',
-    icon: (
-      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white font-bold text-sm">
-        👻
-      </div>
-    ),
-    description: 'Connect Solana and Solana-based tokens',
-    connection: 'Browser Extension / Mobile App',
+    type: 'SOLANA SVM',
     chainType: 'SOLANA',
   },
 ];
 
 export default function WalletConnectModal({ onClose }: WalletConnectModalProps) {
   const { walletState, connectWallet, disconnectWallet } = useWalletStore();
-  const [selectedWallet, setSelectedWallet] = useState<WalletProviderType | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleConnect = async (walletId: WalletProviderType) => {
-    setSelectedWallet(walletId);
     setIsConnecting(true);
     setError(null);
-
     try {
       await connectWallet(walletId);
+      // Optional: Don't close immediately to show "Success" state if you want
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Connection failed');
@@ -68,215 +52,175 @@ export default function WalletConnectModal({ onClose }: WalletConnectModalProps)
     }
   };
 
-  const handleDisconnect = () => {
-    disconnectWallet();
-    onClose();
-  };
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      {/* Heavy Blur Backdrop */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/80 backdrop-blur-md"
       />
 
-      {/* Modal */}
+      {/* The "Auth Key" Modal */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        initial={{ opacity: 0, scale: 0.95, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="relative w-full max-w-md card p-6"
+        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+        className="relative w-full max-w-sm bento-card bg-[#050505] shadow-2xl overflow-hidden"
       >
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <Wallet className="w-6 h-6 text-monero-orange" />
-            <h2 className="text-xl font-bold text-white">
-              {walletState.isConnected ? 'Wallet Connected' : 'Connect Wallet'}
+        {/* Header - Security Style */}
+        <div className="flex items-center justify-between px-6 py-5 border-b border-obsidian-800">
+          <div className="flex items-center gap-2">
+            <div className={`w-2 h-2 rounded-full ${walletState.isConnected ? 'bg-emerald-500' : 'bg-white'} animate-pulse`} />
+            <h2 className="text-sm font-serif text-white tracking-widest">
+              {walletState.isConnected ? 'SESSION ACTIVE' : 'AUTHENTICATE'}
             </h2>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-lg hover:bg-obsidian-800 transition-colors"
+            className="text-obsidian-500 hover:text-white transition-colors"
           >
-            <X className="w-5 h-5 text-gray-400" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Privacy Notice */}
-        <div className="mb-6 p-4 rounded-lg bg-terminal-green/5 border border-terminal-green/20">
-          <div className="flex items-start gap-3">
-            <Shield className="w-5 h-5 text-terminal-green mt-0.5" />
-            <div>
-              <p className="text-terminal-green font-medium text-sm">Secure Connection</p>
-              <p className="text-gray-400 text-xs mt-1">
-                Your wallet connects directly to the blockchain. We never have access to your private keys or funds.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Connected Wallet Info */}
-        {walletState.isConnected ? (
-          <div className="space-y-4">
-            <div className="p-4 rounded-lg bg-obsidian-800/50 border border-obsidian-700">
-              <div className="flex items-center gap-3 mb-4">
-                {walletState.provider === 'METAMASK' ? (
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white font-bold text-sm">
-                    MM
-                  </div>
-                ) : (
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center text-white font-bold text-sm">
-                    👻
-                  </div>
-                )}
-                <div>
-                  <p className="text-white font-medium">{walletState.provider}</p>
-                  <p className="text-gray-400 text-xs capitalize">
-                    {walletState.chainType?.toLowerCase()} network
-                  </p>
-                </div>
+        <div className="p-6">
+          {/* Privacy Disclaimer */}
+          {!walletState.isConnected && (
+            <div className="mb-6 flex gap-3 p-3 rounded bg-obsidian-900/30 border border-obsidian-800/50">
+              <ShieldCheck className="w-4 h-4 text-obsidian-400 mt-0.5 shrink-0" />
+              <div className="text-[10px] text-obsidian-400 font-mono leading-relaxed">
+                <span className="text-white">NO IDENTITY REQUIRED.</span> Connection is used solely for signing transactions locally. 
+                Keys never leave your hardware.
               </div>
+            </div>
+          )}
 
-              {/* Address */}
-              <div className="p-3 rounded-lg bg-obsidian-900 border border-obsidian-700">
-                <p className="text-gray-500 text-xs mb-1">Connected Address</p>
-                <div className="flex items-center gap-2">
-                  <code className="text-white font-mono text-sm flex-1 truncate">
-                    {walletState.address?.slice(0, 10)}...{walletState.address?.slice(-8)}
-                  </code>
-                  <button
+          {walletState.isConnected ? (
+            /* CONNECTED STATE */
+            <div className="space-y-6">
+              {/* Identity Card */}
+              <div className="relative p-5 rounded-xl border border-obsidian-700 bg-obsidian-900/20 overflow-hidden group">
+                {/* Decorative scanning line */}
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/[0.03] to-transparent translate-y-[-100%] group-hover:translate-y-[100%] transition-transform duration-1000" />
+                
+                <div className="flex justify-between items-start mb-4">
+                  <span className="text-[10px] font-mono text-obsidian-500 uppercase tracking-widest">Connected via {walletState.provider}</span>
+                  <div className="px-2 py-0.5 rounded border border-emerald-500/30 bg-emerald-500/10 text-[10px] text-emerald-400 font-mono">
+                    SECURE
+                  </div>
+                </div>
+
+                <div className="font-mono text-xl text-white tracking-tight mb-1">
+                  {walletState.address?.slice(0, 6)}...{walletState.address?.slice(-4)}
+                </div>
+                
+                <div className="flex items-center gap-2 mt-4">
+                   <button 
                     onClick={() => navigator.clipboard.writeText(walletState.address || '')}
-                    className="p-1.5 rounded hover:bg-obsidian-700 transition-colors"
-                  >
-                    <Copy className="w-4 h-4 text-gray-400" />
-                  </button>
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-obsidian-800 hover:bg-obsidian-700 text-xs font-mono text-white transition-colors"
+                   >
+                     <Copy className="w-3 h-3" /> COPY ID
+                   </button>
+                   <a 
+                    href="#"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded border border-obsidian-800 hover:border-obsidian-600 text-xs font-mono text-obsidian-400 hover:text-white transition-colors"
+                   >
+                     <ExternalLink className="w-3 h-3" /> EXPLORER
+                   </a>
                 </div>
               </div>
 
-              {/* Balance */}
-              <div className="mt-3 flex items-center justify-between">
-                <span className="text-gray-500 text-sm">Balance</span>
-                <span className="text-white font-mono">
-                  {walletState.balance} {walletState.chainType === 'SOLANA' ? 'SOL' : 'ETH'}
-                </span>
+              {/* Balance Row */}
+              <div className="flex items-center justify-between p-4 rounded-lg border border-obsidian-800 bg-black">
+                <div className="flex items-center gap-3">
+                   <div className="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center">
+                      <Zap className="w-4 h-4 fill-current" />
+                   </div>
+                   <div className="flex flex-col">
+                      <span className="text-[10px] font-mono text-obsidian-500 uppercase">Available Balance</span>
+                      <span className="text-sm font-mono text-white">
+                        {walletState.balance || '0.00'} {walletState.chainType === 'SOLANA' ? 'SOL' : 'ETH'}
+                      </span>
+                   </div>
+                </div>
               </div>
+
+              <button
+                onClick={() => {
+                  disconnectWallet();
+                  onClose();
+                }}
+                className="w-full btn-secondary py-4 text-xs tracking-widest hover:bg-red-950/30 hover:border-red-900 hover:text-red-400"
+              >
+                TERMINATE SESSION
+              </button>
             </div>
+          ) : (
+            /* DISCONNECTED STATE */
+            <div className="space-y-3">
+              {error && (
+                <div className="mb-4 p-3 rounded bg-red-900/10 border border-red-900/30 flex items-center gap-3">
+                  <AlertCircle className="w-4 h-4 text-red-500" />
+                  <span className="text-xs text-red-400 font-mono">{error}</span>
+                </div>
+              )}
 
-            {/* Disconnect Button */}
-            <button
-              onClick={handleDisconnect}
-              className="w-full btn-secondary py-3"
-            >
-              Disconnect Wallet
-            </button>
-          </div>
-        ) : (
-          <>
-            {/* Error Display */}
-            {error && (
-              <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
-                <p className="text-red-400 text-sm">{error}</p>
-              </div>
-            )}
-
-            {/* Wallet Options Grid */}
-            <div className="grid grid-cols-1 gap-3">
-              {walletOptions.map((wallet) => {
-                const isSelected = selectedWallet === wallet.id;
-                const isConnectingWallet = isConnecting && selectedWallet === wallet.id;
-
-                return (
-                  <motion.button
-                    key={wallet.id}
-                    onClick={() => handleConnect(wallet.id)}
-                    disabled={isConnecting}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className={`flex items-center gap-4 p-4 rounded-xl bg-obsidian-800/50 border transition-all group text-left
-                      ${isSelected ? 'border-monero-orange/50 bg-monero-orange/5' : 'border-obsidian-700 hover:border-monero-orange/50'}
-                      ${isConnectingWallet ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  >
-                    <div className="flex-shrink-0">
-                      {wallet.icon}
+              {walletOptions.map((wallet) => (
+                <button
+                  key={wallet.id}
+                  onClick={() => handleConnect(wallet.id)}
+                  disabled={isConnecting}
+                  className="w-full group relative flex items-center justify-between p-4 rounded-lg border border-obsidian-800 bg-obsidian-900/20 hover:bg-obsidian-800 hover:border-obsidian-600 transition-all disabled:opacity-50 disabled:cursor-wait"
+                >
+                  <div className="flex items-center gap-4">
+                    {/* Minimalist Icon Placeholder */}
+                    <div className={`w-10 h-10 rounded border border-obsidian-700 flex items-center justify-center bg-black group-hover:border-white transition-colors`}>
+                      {wallet.id === 'METAMASK' ? (
+                        <div className="w-3 h-3 bg-[#F6851B] rotate-45" /> 
+                      ) : (
+                         <div className="w-3 h-3 bg-[#AB9FF2] rounded-full" />
+                      )}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="text-white font-medium">{wallet.name}</p>
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-mono ${
-                          wallet.chainType === 'EVM' 
-                            ? 'bg-blue-500/20 text-blue-400' 
-                            : 'bg-purple-500/20 text-purple-400'
-                        }`}>
-                          {wallet.chainType}
-                        </span>
+                    
+                    <div className="text-left">
+                      <div className="font-serif text-white text-lg leading-none group-hover:translate-x-1 transition-transform">
+                        {wallet.name}
                       </div>
-                      <p className="text-gray-400 text-sm truncate">{wallet.description}</p>
-                      <p className="text-gray-500 text-xs mt-1 flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-gray-600" />
-                        {wallet.connection}
-                      </p>
+                      <div className="text-[10px] font-mono text-obsidian-500 mt-1 uppercase tracking-wider">
+                        {wallet.type}
+                      </div>
                     </div>
-                    {isConnectingWallet ? (
-                      <div className="w-5 h-5 border-2 border-monero-orange border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <ExternalLink className="w-5 h-5 text-gray-500 group-hover:text-monero-orange transition-colors" />
-                    )}
-                  </motion.button>
-                );
-              })}
-            </div>
+                  </div>
 
-            {/* Supported Chains Info */}
-            <div className="mt-6 p-4 rounded-lg bg-obsidian-800/30 border border-obsidian-700">
-              <p className="text-gray-400 text-xs mb-3">Supported Networks</p>
-              <div className="flex flex-wrap gap-2">
-                {SUPPORTED_CHAINS.filter(c => c.type !== 'XMR').map((chain) => (
-                  <span
-                    key={chain.id}
-                    className={`px-2 py-1 rounded text-xs font-medium ${
-                      chain.type === 'EVM'
-                        ? 'bg-blue-500/20 text-blue-400'
-                        : 'bg-cyan-500/20 text-cyan-400'
-                    }`}
-                  >
-                    {chain.name}
-                  </span>
-                ))}
+                  <Key className="w-4 h-4 text-obsidian-600 group-hover:text-white transition-colors" />
+                </button>
+              ))}
+
+              {/* Supported Networks Strip */}
+              <div className="pt-6 mt-2 border-t border-obsidian-800/50">
+                <div className="text-[9px] font-mono text-obsidian-600 uppercase mb-2 text-center">
+                  Encrypted Channels
+                </div>
+                <div className="flex justify-center gap-2 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
+                  {SUPPORTED_CHAINS.filter(c => c.type !== 'XMR').map(chain => (
+                    <div key={chain.id} className="w-6 h-6 rounded-full bg-obsidian-800 border border-obsidian-700 flex items-center justify-center text-[8px] text-white">
+                      {chain.name[0]}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
-
-            {/* Footer */}
-            <div className="mt-6 pt-4 border-t border-obsidian-800">
-              <p className="text-center text-gray-500 text-sm">
-                Don&apos;t have a wallet?{' '}
-                <a
-                  href={WALLET_LINKS.METAMASK}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-monero-orange hover:underline inline-flex items-center gap-1"
-                >
-                  Get MetaMask
-                  <ExternalLink className="w-3 h-3" />
-                </a>
-                {' '}or{' '}
-                <a
-                  href={WALLET_LINKS.PHANTOM}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-monero-orange hover:underline inline-flex items-center gap-1"
-                >
-                  Get Phantom
-                  <ExternalLink className="w-3 h-3" />
-                </a>
-              </p>
-            </div>
-          </>
-        )}
+          )}
+        </div>
+        
+        {/* Footer Text */}
+        <div className="px-6 py-3 bg-obsidian-950 border-t border-obsidian-800 flex justify-between items-center text-[9px] font-mono text-obsidian-600">
+          <span>v2.4.0-secure</span>
+          <span>E2EE ENABLED</span>
+        </div>
       </motion.div>
     </div>
   );

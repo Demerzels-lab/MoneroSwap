@@ -1,179 +1,175 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Shield, 
-  Settings, 
-  Wallet, 
-  Menu, 
-  X, 
-  Activity,
-  ExternalLink
-} from 'lucide-react';
+import { Menu, X, ChevronRight, Activity, Wallet } from 'lucide-react';
+import { useWalletStore } from '@/store/useSwapStore';
 
 interface HeaderProps {
   onConnectWallet: () => void;
-  walletConnected?: boolean;
-  walletAddress?: string | null;
-  walletProvider?: string | null;
+  walletConnected: boolean;
+  walletAddress: string | null;
+  walletProvider: string | null;
 }
 
 export default function Header({ 
   onConnectWallet, 
-  walletConnected = false, 
-  walletAddress,
-  walletProvider 
+  walletConnected, 
+  walletAddress 
 }: HeaderProps) {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
 
-  const formatAddress = (address: string | null | undefined): string => {
-    if (!address) return '';
-    return `${address.slice(0, 6)}...${address.slice(-4)}`;
-  };
+  // Detect scroll to add a subtle border
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const navLinks = [
+    { name: 'Swap', path: '/swap' },
+    { name: 'History', path: '/history' },
+    { name: 'Docs', path: '/docs' },
+  ];
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-obsidian-800 bg-obsidian-950/80 backdrop-blur-xl">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
-          {/* Logo */}
-          <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-3"
-          >
-            <Link href="/" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-monero-orange to-monero-orangeDark flex items-center justify-center">
-                <Shield className="w-6 h-6 text-white" />
-              </div>
-              <div className="hidden sm:block">
-                <span className="font-bold text-lg text-white">MoneroSwap</span>
-                <span className="text-xs text-monero-orange font-mono ml-2">DEX</span>
-              </div>
-            </Link>
-          </motion.div>
+    <header 
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled ? 'bg-background/80 backdrop-blur-md border-b border-obsidian-800' : 'bg-transparent'
+      }`}
+    >
+      <div className="container mx-auto px-6 h-20 flex items-center justify-between">
+        
+        {/* 1. LOGO - Editorial Style */}
+        <Link href="/" className="flex items-center gap-3 group">
+          <div className="w-8 h-8 bg-white text-black flex items-center justify-center rounded-sm group-hover:scale-95 transition-transform">
+             {/* Simple geometric logo mark */}
+             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+               <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+               <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+               <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+             </svg>
+          </div>
+          <div className="flex flex-col">
+            <span className="font-serif text-lg text-white leading-none tracking-tight">MoneroSwap</span>
+            <span className="font-mono text-[9px] text-obsidian-500 tracking-widest uppercase">Protocol v1.0</span>
+          </div>
+        </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-8">
-            <Link href="/swap" className="nav-link">
-              Swap
-            </Link>
-            <Link href="/history" className="nav-link">
-              History
-            </Link>
-            <Link href="/docs" className="nav-link">
-              Docs
-            </Link>
-            <a 
-              href="https://github.com" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="nav-link flex items-center gap-1"
-            >
-              GitHub
-              <ExternalLink className="w-3 h-3" />
-            </a>
-          </nav>
-
-          {/* Right Section */}
-          <div className="flex items-center gap-4">
-            {/* Network Status */}
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-obsidian-900 border border-obsidian-800">
-              <Activity className="w-4 h-4 text-terminal-green" />
-              <span className="text-xs terminal-text">Multi-Chain</span>
-            </div>
-
-            {/* Settings Button */}
-            <button className="p-2 rounded-lg hover:bg-obsidian-800 transition-colors">
-              <Settings className="w-5 h-5 text-gray-400" />
-            </button>
-
-            {/* Connect Wallet Button */}
-            <button
-              onClick={onConnectWallet}
-              className={`hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg font-mono text-sm transition-all ${
-                walletConnected 
-                  ? 'bg-terminal-green/10 border border-terminal-green/30 text-terminal-green'
-                  : 'bg-monero-orange/10 border border-monero-orange/30 text-monero-orange hover:bg-monero-orange/20'
+        {/* 2. DESKTOP NAV - Minimalist & Centered */}
+        <nav className="hidden md:flex items-center gap-8">
+          {navLinks.map((link) => (
+            <Link 
+              key={link.path} 
+              href={link.path}
+              className={`text-sm font-medium tracking-wide transition-colors duration-200 ${
+                pathname === link.path ? 'text-white' : 'text-obsidian-400 hover:text-white'
               }`}
             >
-              <Wallet className="w-4 h-4" />
-              {walletConnected && walletProvider ? (
-                <span>{walletProvider} • {formatAddress(walletAddress)}</span>
-              ) : (
-                'Connect Wallet'
-              )}
-            </button>
+              {link.name}
+            </Link>
+          ))}
+        </nav>
 
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden p-2 rounded-lg hover:bg-obsidian-800 transition-colors"
-            >
-              {isMenuOpen ? (
-                <X className="w-5 h-5 text-gray-400" />
-              ) : (
-                <Menu className="w-5 h-5 text-gray-400" />
-              )}
-            </button>
+        {/* 3. RIGHT PANEL - Status & Wallet */}
+        <div className="hidden md:flex items-center gap-6">
+          {/* Network Status Indicator */}
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-obsidian-800 bg-obsidian-900/50">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <span className="text-[10px] font-mono text-obsidian-400 uppercase tracking-wider">
+              Mainnet
+            </span>
           </div>
+
+          {/* Wallet Button - The "Data" Look */}
+          {walletConnected && walletAddress ? (
+            <button 
+              onClick={onConnectWallet}
+              className="flex items-center gap-3 pl-1 pr-4 py-1 rounded-full border border-obsidian-700 bg-black hover:border-obsidian-500 transition-colors group"
+            >
+              <div className="w-8 h-8 rounded-full bg-obsidian-800 flex items-center justify-center text-white group-hover:bg-white group-hover:text-black transition-colors">
+                <Wallet className="w-4 h-4" />
+              </div>
+              <div className="flex flex-col items-start">
+                <span className="text-[10px] text-obsidian-500 font-mono uppercase">Connected</span>
+                <span className="text-xs text-white font-mono tracking-tight">
+                  {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
+                </span>
+              </div>
+            </button>
+          ) : (
+            <button 
+              onClick={onConnectWallet}
+              className="btn-primary text-xs py-2.5 px-5 h-10"
+            >
+              Connect Wallet
+            </button>
+          )}
         </div>
 
-        {/* Mobile Menu */}
-        <AnimatePresence>
-          {isMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="md:hidden py-4 border-t border-obsidian-800"
-            >
-              <nav className="flex flex-col gap-2">
-                <Link 
-                  href="/swap" 
-                  className="px-4 py-2 rounded-lg hover:bg-obsidian-800 text-gray-300"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Swap
-                </Link>
-                <Link 
-                  href="/history" 
-                  className="px-4 py-2 rounded-lg hover:bg-obsidian-800 text-gray-300"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  History
-                </Link>
-                <Link 
-                  href="/docs" 
-                  className="px-4 py-2 rounded-lg hover:bg-obsidian-800 text-gray-300"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Docs
-                </Link>
-                <button
-                  onClick={() => {
-                    setIsMenuOpen(false);
-                    onConnectWallet();
-                  }}
-                  className={`flex items-center gap-2 px-4 py-2 mt-2 rounded-lg font-mono text-sm ${
-                    walletConnected 
-                      ? 'bg-terminal-green/10 border border-terminal-green/30 text-terminal-green'
-                      : 'bg-monero-orange/10 border border-monero-orange/30 text-monero-orange'
-                  }`}
-                >
-                  <Wallet className="w-4 h-4" />
-                  {walletConnected && walletProvider ? (
-                    <span>{walletProvider} • {formatAddress(walletAddress)}</span>
-                  ) : (
-                    'Connect Wallet'
-                  )}
-                </button>
-              </nav>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* 4. MOBILE HAMBURGER */}
+        <button 
+          className="md:hidden text-white p-2"
+          onClick={() => setMobileMenuOpen(true)}
+        >
+          <Menu className="w-6 h-6" />
+        </button>
       </div>
+
+      {/* 5. MOBILE MENU OVERLAY */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, x: '100%' }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: '100%' }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="fixed inset-0 z-[60] bg-background md:hidden flex flex-col"
+          >
+            {/* Mobile Header */}
+            <div className="h-20 px-6 flex items-center justify-between border-b border-obsidian-800">
+              <span className="font-serif text-xl text-white">Menu</span>
+              <button onClick={() => setMobileMenuOpen(false)} className="text-obsidian-400 hover:text-white">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Mobile Links */}
+            <div className="flex-1 p-6 flex flex-col gap-6">
+              {navLinks.map((link) => (
+                <Link 
+                  key={link.path} 
+                  href={link.path}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center justify-between text-2xl font-light text-white border-b border-obsidian-800 pb-4"
+                >
+                  {link.name}
+                  <ChevronRight className="w-5 h-5 text-obsidian-600" />
+                </Link>
+              ))}
+
+              <div className="mt-auto">
+                 <button 
+                  onClick={() => {
+                    onConnectWallet();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full btn-primary py-4 text-lg"
+                >
+                  {walletConnected ? 'Wallet Connected' : 'Connect Wallet'}
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 }

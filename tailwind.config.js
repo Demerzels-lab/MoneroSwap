@@ -1,4 +1,6 @@
 /** @type {import('tailwindcss').Config} */
+const defaultTheme = require('tailwindcss/defaultTheme');
+
 module.exports = {
   content: [
     './pages/**/*.{js,ts,jsx,tsx,mdx}',
@@ -8,63 +10,54 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        // The "Axora" Dark Palette: Strict Monochrome
+        background: '#030303', // Almost pure black for depth
+        surface: '#0A0A0A',    // Slightly lighter for cards
+        
+        // Neutral Grays for borders and text (Zinc scale)
         obsidian: {
           50: '#fafafa',
-          100: '#f5f5f5',
-          200: '#e5e5e5',
-          300: '#d4d4d4',
-          400: '#a3a3a3',
-          500: '#737373',
-          600: '#525252',
-          700: '#404040',
-          800: '#262626',
-          900: '#171717',
-          950: '#050505',
+          100: '#f4f4f5',
+          200: '#e4e4e7',  // Primary Text (High contrast)
+          300: '#d4d4d8',
+          400: '#a1a1aa',  // Secondary/Muted Text
+          500: '#71717a',
+          600: '#52525b',
+          700: '#3f3f46',
+          800: '#27272a',  // Borders
+          900: '#18181b',  // Card Backgrounds
+          950: '#09090b',  // Main Background
         },
-        monero: {
-          orange: '#F26822',
-          orangeLight: '#FF8A50',
-          orangeDark: '#CC4A0F',
-        },
-        terminal: {
-          green: '#00FF41',
-          greenDim: '#00CC33',
-          red: '#FF0033',
-          yellow: '#FFFF00',
-        },
-        cyber: {
-          blue: '#00D4FF',
-        },
+        
+        // We keep a single "Action" color, but desaturated white/glow 
+        // instead of neon orange, or a very subtle "Monero Gray"
+        action: {
+            DEFAULT: '#ffffff',
+            hover: '#e5e5e5',
+            muted: '#404040'
+        }
       },
       fontFamily: {
-        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-      },
-      animation: {
-        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'scanline': 'scanline 10s linear infinite',
-        'glitch': 'glitch 1s linear infinite',
-        'glow': 'glow 2s ease-in-out infinite alternate',
-      },
-      keyframes: {
-        scanline: {
-          '0%': { transform: 'translateY(-100%)' },
-          '100%': { transform: 'translateY(100vh)' },
-        },
-        glitch: {
-          '2%, 64%': { transform: 'translate(2px,0) skew(0deg)' },
-          '4%, 60%': { transform: 'translate(-2px,0) skew(0deg)' },
-          '62%': { transform: 'translate(0,0) skew(5deg)' },
-        },
-        glow: {
-          '0%': { boxShadow: '0 0 5px #F26822, 0 0 10px #F26822' },
-          '100%': { boxShadow: '0 0 20px #F26822, 0 0 30px #F26822, 0 0 40px #F26822' },
-        },
+        // "Editorial" Heading Font (Serif)
+        serif: ['Playfair Display', 'Merriweather', ...defaultTheme.fontFamily.serif],
+        // Clean Swiss Body Font (Sans)
+        sans: ['Inter', ...defaultTheme.fontFamily.sans],
+        // Technical Data Font (Mono)
+        mono: ['JetBrains Mono', ...defaultTheme.fontFamily.mono],
       },
       backgroundImage: {
-        'scanline': 'linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06))',
-        'grid-pattern': 'linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px)',
-        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+        // Subtle noise/grid for that "high-end tech" feel, less aggressive than scanlines
+        'noise': "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E\")",
+        'subtle-grid': 'linear-gradient(to right, #27272a 1px, transparent 1px), linear-gradient(to bottom, #27272a 1px, transparent 1px)',
+      },
+      animation: {
+        'fade-in': 'fadeIn 0.5s ease-out forwards',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0', transform: 'translateY(10px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
       },
     },
   },

@@ -2,171 +2,175 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+/* 1. TYPOGRAPHY IMPORTS
+  - Playfair Display: For that "New York Times" / Editorial Headline feel.
+  - Inter: For clean, Swiss-style UI text.
+  - JetBrains Mono: For technical data and numbers.
+*/
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap');
 
 @layer base {
-  * {
-    @apply border-obsidian-800;
+  :root {
+    /* Define a subtle grain opacity for the noise texture */
+    --noise-opacity: 0.03;
   }
-  
+
+  /* 2. CORE RESET & THEME
+    We override the default browser styles to force the monochrome aesthetic.
+  */
   body {
-    @apply bg-obsidian-950 text-gray-100 font-sans antialiased;
-    background-image: 
-      linear-gradient(rgba(5, 5, 5, 0.97), rgba(5, 5, 5, 0.97)),
-      linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 65, 0.01), rgba(0, 0, 255, 0.03));
-    background-size: 100% 100%, 3px 3px;
+    @apply bg-background text-obsidian-200 font-sans antialiased;
+    
+    /* The "Cinema Grain" Texture - creates that expensive, film-like feel */
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+    background-attachment: fixed; /* Texture stays static while you scroll */
   }
 
+  /* High Contrast Selection - White text on Dark Gray background */
   ::selection {
-    @apply bg-monero-orange/30 text-white;
+    @apply bg-obsidian-200 text-background;
   }
 
+  /* 3. SCROLLBARS
+    Minimalist, thin, and dark. No rounded corners, strictly rectangular.
+  */
   ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-obsidian-900;
+    @apply bg-background;
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-obsidian-700 rounded-full;
+    @apply bg-obsidian-800 hover:bg-obsidian-600 transition-colors;
   }
 
-  ::-webkit-scrollbar-thumb:hover {
-    @apply bg-monero-orange/80;
+  /* 4. TYPOGRAPHY HIERARCHY
+    We map HTML headings to the Serif font automatically.
+  */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif font-normal tracking-tight text-white;
   }
 }
 
 @layer components {
-  .btn-primary {
-    @apply px-6 py-3 bg-monero-orange text-white font-mono font-semibold rounded-lg
-           hover:bg-monero-orangeLight transition-all duration-200
-           active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed
-           shadow-lg shadow-monero-orange/20 hover:shadow-monero-orange/40;
+  /* === BENTO CARD SYSTEM ===
+    The building block of your new UI.
+    - Flat design (no heavy drop shadows).
+    - 1px borders using Zinc-800.
+    - Subtle backdrop blur.
+  */
+  .bento-card {
+    @apply relative overflow-hidden rounded-xl border border-obsidian-800 bg-surface/40 backdrop-blur-md
+           transition-all duration-300 hover:border-obsidian-600 hover:bg-surface/60;
   }
 
-  .btn-secondary {
-    @apply px-6 py-3 border border-obsidian-700 text-gray-300 font-mono font-medium rounded-lg
-           hover:border-monero-orange hover:text-monero-orange transition-all duration-200
+  /* Interactive cards (like swap options) get a "Lift" effect */
+  .card-interactive {
+    @apply bento-card cursor-pointer active:scale-[0.99] active:border-obsidian-500;
+  }
+
+  /* === BUTTONS ===
+    Swapped from Neon Orange to Monochrome High-Contrast.
+  */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg
+           bg-white text-black font-sans font-medium tracking-wide text-sm
+           transition-all duration-200 
+           hover:bg-obsidian-200 hover:shadow-[0_0_20px_rgba(255,255,255,0.15)]
            active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg
+           border border-obsidian-800 bg-transparent text-obsidian-300 font-sans font-medium text-sm
+           transition-all duration-200
+           hover:border-obsidian-200 hover:text-white hover:bg-white/5
+           active:scale-[0.98] disabled:opacity-50;
+  }
+
+  /* === INPUTS ===
+    Removed the glowing border. Now it's a solid, technical block.
+  */
   .input-field {
-    @apply w-full px-4 py-3 bg-obsidian-900 border border-obsidian-700 rounded-lg
-           text-white placeholder-gray-500 font-mono
-           focus:outline-none focus:border-monero-orange focus:ring-2 focus:ring-monero-orange/20
-           transition-all duration-200;
+    @apply w-full px-4 py-3 rounded-lg
+           bg-obsidian-900/50 border border-obsidian-800
+           text-white font-mono text-sm placeholder:text-obsidian-600
+           transition-all duration-200
+           focus:outline-none focus:border-obsidian-500 focus:bg-obsidian-900
+           hover:border-obsidian-700;
   }
 
-  .card {
-    @apply bg-obsidian-900/80 backdrop-blur-xl border border-obsidian-800 rounded-2xl
-           shadow-2xl shadow-black/50;
-  }
-
-  .card-interactive {
-    @apply card hover:border-monero-orange/50 transition-all duration-300 cursor-pointer;
-  }
-
-  .terminal-text {
-    @apply font-mono text-terminal-green;
-  }
-
-  .terminal-text-dim {
-    @apply font-mono text-terminal-green/60 text-sm;
-  }
-
-  .status-badge {
-    @apply inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono font-medium;
-  }
-
-  .status-pending {
-    @apply status-badge bg-terminal-yellow/10 text-terminal-yellow border border-terminal-yellow/30;
-  }
-
-  .status-success {
-    @apply status-badge bg-terminal-green/10 text-terminal-green border border-terminal-green/30;
-  }
-
-  .status-error {
-    @apply status-badge bg-terminal-red/10 text-terminal-red border border-terminal-red/30;
-  }
-
+  /* === NAVIGATION ===
+    Replaced the "Orange Underline" with a subtle color shift.
+  */
   .nav-link {
-    @apply text-gray-400 hover:text-white font-mono text-sm transition-colors duration-200
-           relative after:content-[''] after:absolute after:left-0 after:-bottom-1
-           after:w-0 after:h-0.5 after:bg-monero-orange after:transition-all
-           hover:after:w-full;
+    @apply relative text-sm font-medium text-obsidian-400 font-sans tracking-wide
+           transition-colors duration-200 hover:text-white;
   }
 
   .nav-link-active {
-    @apply text-monero-orange after:w-full;
+    @apply text-white font-semibold;
   }
 
-  .glow-effect {
-    @apply relative;
+  /* === STATUS BADGES ===
+    Migrated from "Traffic Light Colors" to "Monochrome Indicators".
+  */
+  .status-badge {
+    @apply inline-flex items-center gap-2 px-2.5 py-1 rounded-md text-xs font-mono border;
   }
 
-  .glow-effect::before {
-    content: '';
-    @apply absolute inset-0 rounded-xl bg-monero-orange/20 blur-xl -z-10 opacity-0
-           transition-opacity duration-300;
+  /* Success = Solid White Border/Text (High Signal) */
+  .status-success {
+    @apply status-badge border-obsidian-600 text-obsidian-200 bg-white/5;
   }
 
-  .glow-effect:hover::before {
-    @apply opacity-100;
+  /* Pending = Dashed Border (Unfinished state) */
+  .status-pending {
+    @apply status-badge border-obsidian-800 text-obsidian-400 bg-transparent border-dashed;
   }
 
-  .scanline-overlay {
-    @apply pointer-events-none fixed inset-0 z-50;
-    background: repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(0, 0, 0, 0.1) 2px,
-      rgba(0, 0, 0, 0.1) 4px
-    );
+  /* Error = Solid dark gray with line-through or dim text */
+  .status-error {
+    @apply status-badge border-obsidian-700 text-obsidian-500 bg-obsidian-900;
   }
 
-  .crypto-icon {
-    @apply w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold;
+  /* === DATA DISPLAY ===
+    Specific styles for crypto numbers.
+  */
+  .text-fiat {
+    @apply font-serif text-obsidian-400 italic;
   }
 
-  .crypto-icon-xmr {
-    @apply crypto-icon bg-gradient-to-br from-monero-orange to-monero-orangeDark;
-  }
-
-  .crypto-icon-btc {
-    @apply crypto-icon bg-gradient-to-br from-orange-500 to-orange-700;
-  }
-
-  .crypto-icon-eth {
-    @apply crypto-icon bg-gradient-to-br from-indigo-500 to-indigo-700;
+  .text-crypto {
+    @apply font-mono text-white tracking-tight;
   }
 }
 
 @layer utilities {
-  .text-gradient {
-    @apply bg-gradient-to-r from-monero-orange to-monero-orangeLight bg-clip-text text-transparent;
+  /* "The Editorial Headline" 
+    Use this for your main "Swap" or "MoneroSwap" text.
+  */
+  .text-display {
+    @apply font-serif text-5xl md:text-7xl leading-[1.1] tracking-tight text-white;
   }
 
-  .border-glow {
-    box-shadow: 0 0 20px rgba(242, 104, 34, 0.3), inset 0 0 20px rgba(242, 104, 34, 0.1);
+  /* "The Technical Label"
+    Use this for small headers like "YOU PAY", "EXCHANGE RATE".
+  */
+  .text-label {
+    @apply font-mono text-[10px] uppercase tracking-[0.15em] text-obsidian-500 font-semibold;
   }
 
-  .animate-in {
-    animation: animateIn 0.5s ease-out forwards;
+  /* A utility to center content in a bento box */
+  .flex-center {
+    @apply flex items-center justify-center;
   }
-
-  @keyframes animateIn {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+  
+  /* A subtle glow only used for the absolute most important elements */
+  .glow-white {
+    box-shadow: 0 0 20px -5px rgba(255, 255, 255, 0.1);
   }
 }
