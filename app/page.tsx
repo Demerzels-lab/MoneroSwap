@@ -533,7 +533,7 @@ function CommunitySection() {
           {/* X (Twitter) Card */}
           <FadeIn delay={0.2}>
             <a 
-              href="#" // Placeholder Link
+              href="https://x.com/moneroswap_" 
               target="_blank" 
               rel="noreferrer"
               className="group block p-8 rounded-2xl border border-obsidian-800 bg-background hover:bg-[#1DA1F2] hover:border-[#1DA1F2] transition-all duration-300"
