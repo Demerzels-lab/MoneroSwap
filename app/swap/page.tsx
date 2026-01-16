@@ -106,8 +106,8 @@ export default function SwapPage() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="flex-1 w-full max-w-lg mx-auto lg:max-w-none"
           >
-            {/* Pass the state setter function to the component */}
-            <SwapCard onVisualizing={setIsVisualizing} /> 
+            {/* FIX: Pass the state setter so the card can trigger the visualizer */}
+            <SwapCard onVisualizing={setIsVisualizing} />
           </motion.div>
 
           {/* Privacy Visualizer Panel - Aligned to side */}
