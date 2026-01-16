@@ -10,7 +10,8 @@ import { useWalletStore } from '@/store/useSwapStore';
 import { 
   ArrowRight, ChevronDown, ChevronUp, 
   Shield, Zap, Lock, Activity, Layers, 
-  Cpu, Network, Eye, Key, Terminal 
+  Cpu, Network, Eye, Key, Terminal,
+  Copy, Check, Github, Twitter 
 } from 'lucide-react';
 
 // === UI COMPONENTS ===
@@ -352,6 +353,210 @@ function FeatureGrid() {
   );
 }
 
+// Roadmap: Vertical Layout with Alternating Sides
+function RoadmapSection() {
+  const quarters = [
+    {
+      quarter: 'Q1 2026',
+      title: 'Foundation',
+      status: 'current',
+      items: ['Multi-chain swap interface', 'MetaMask & Phantom integration', 'Ring signature visualization', 'Public beta launch', 'Security audit completion'],
+    },
+    {
+      quarter: 'Q2 2026',
+      title: 'Expansion',
+      status: 'upcoming',
+      items: ['Mobile-responsive PWA', 'Hardware wallet support', 'Additional EVM chains', 'Limit order functionality', 'Price alerts'],
+    },
+    {
+      quarter: 'Q3 2026',
+      title: 'Integration',
+      status: 'upcoming',
+      items: ['DEX aggregator integration', 'Cross-chain liquidity pools', 'API for developers', 'Institutional features', 'Advanced privacy options'],
+    },
+    {
+      quarter: 'Q4 2026',
+      title: 'Decentralization',
+      status: 'upcoming',
+      items: ['Governance token launch', 'DAO formation', 'Community voting', 'Revenue sharing', 'Grants program'],
+    },
+  ];
+
+  return (
+    <section className="py-32 bg-obsidian-950 border-t border-obsidian-900">
+      <div className="container mx-auto px-6">
+        <FadeIn className="text-center mb-24">
+          <div className="text-label mb-4">THE PATH FORWARD</div>
+          <h2 className="text-4xl md:text-5xl font-serif text-white mb-6">Development Roadmap</h2>
+          <p className="text-obsidian-400 max-w-xl mx-auto">
+            Our strategic timeline for decentralized privacy and cross-chain dominance.
+          </p>
+        </FadeIn>
+
+        <div className="relative max-w-5xl mx-auto">
+          {/* Vertical Line */}
+          <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-obsidian-800 via-obsidian-500 to-obsidian-800 md:-translate-x-1/2" />
+
+          <div className="space-y-16 md:space-y-24">
+            {quarters.map((q, i) => (
+              <FadeIn key={q.quarter} delay={i * 0.1} className={`relative flex flex-col md:flex-row gap-8 ${
+                i % 2 === 0 ? 'md:flex-row-reverse' : ''
+              }`}>
+                {/* Content Side */}
+                <div className="md:w-1/2 flex flex-col pl-12 md:pl-0 md:items-end md:text-right">
+                   <div className={`p-8 rounded-2xl border bg-background/50 backdrop-blur-sm w-full max-w-lg ${
+                     q.status === 'current' ? 'border-emerald-500/30 shadow-[0_0_30px_-10px_rgba(16,185,129,0.1)]' : 'border-obsidian-800'
+                   } ${i % 2 === 0 && 'md:ml-auto'} ${i % 2 !== 0 && 'md:mr-auto'}`}>
+                      <div className="flex items-center gap-3 mb-4 md:justify-end">
+                        {q.status === 'current' && (
+                          <div className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[10px] font-mono tracking-wider border border-emerald-500/20">
+                            LIVE
+                          </div>
+                        )}
+                        <span className="text-label text-obsidian-400">{q.quarter}</span>
+                      </div>
+                      <h3 className="text-2xl font-serif text-white mb-4">{q.title}</h3>
+                      <ul className="space-y-3">
+                        {q.items.map((item, idx) => (
+                          <li key={idx} className={`text-sm flex items-start gap-2 ${
+                             i % 2 === 0 ? 'md:flex-row-reverse' : ''
+                          }`}>
+                            <span className={`mt-1.5 w-1.5 h-1.5 rounded-full ${q.status === 'current' ? 'bg-emerald-500' : 'bg-obsidian-600'}`} />
+                            <span className="text-obsidian-300 leading-relaxed">{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                   </div>
+                </div>
+
+                {/* Center Node */}
+                <div className="absolute left-4 md:left-1/2 -translate-x-1/2 w-8 h-8 rounded-full border-4 border-obsidian-950 bg-obsidian-800 flex items-center justify-center z-10">
+                   {q.status === 'current' ? (
+                     <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
+                   ) : (
+                     <div className="w-2 h-2 rounded-full bg-obsidian-500" />
+                   )}
+                </div>
+
+                {/* Empty Side for Spacing */}
+                <div className="hidden md:block md:w-1/2" />
+              </FadeIn>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// Contract Address (CA) Section
+function ContractAddressSection() {
+  const [copied, setCopied] = useState(false);
+  const ca = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"; // Placeholder CA
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(ca);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <section className="py-24 border-t border-obsidian-900 bg-background">
+      <div className="container mx-auto px-6 text-center">
+        <FadeIn>
+          <div className="text-label mb-4">VERIFY INTEGRITY</div>
+          <h2 className="text-3xl font-serif text-white mb-8">Official Contract Address</h2>
+          
+          <div className="max-w-2xl mx-auto p-1 rounded-full bg-gradient-to-r from-obsidian-800 via-obsidian-700 to-obsidian-800">
+            <div className="bg-obsidian-950 rounded-full px-4 py-3 flex items-center justify-between gap-4">
+              <code className="font-mono text-sm md:text-base text-obsidian-300 truncate pl-4">
+                {ca}
+              </code>
+              <button 
+                onClick={handleCopy}
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-obsidian-800 hover:bg-white hover:text-black transition-colors text-xs font-medium"
+              >
+                {copied ? (
+                  <>
+                    <Check className="w-3 h-3" /> Copied
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3 h-3" /> Copy
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+          <p className="mt-4 text-xs text-obsidian-500">
+            Always verify the contract address on official channels before interacting.
+          </p>
+        </FadeIn>
+      </div>
+    </section>
+  );
+}
+
+// Community Section (X & Github)
+function CommunitySection() {
+  return (
+    <section className="py-24 bg-obsidian-950 border-t border-obsidian-900">
+      <div className="container mx-auto px-6">
+        <FadeIn className="mb-12 text-center">
+          <h2 className="text-3xl font-serif text-white mb-4">Join the Network</h2>
+          <p className="text-obsidian-400">Contribute to the code or follow the signal.</p>
+        </FadeIn>
+        
+        <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+          {/* GitHub Card */}
+          <FadeIn delay={0.1}>
+            <a 
+              href="https://github.com/Demerzels-lab/MoneroSwap" 
+              target="_blank" 
+              rel="noreferrer"
+              className="group block p-8 rounded-2xl border border-obsidian-800 bg-background hover:bg-white hover:border-white transition-all duration-300"
+            >
+              <div className="flex items-start justify-between mb-8">
+                <Github className="w-8 h-8 text-white group-hover:text-black transition-colors" />
+                <ArrowRight className="w-5 h-5 text-obsidian-600 group-hover:text-black -translate-x-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+              </div>
+              <h3 className="text-xl font-serif text-white group-hover:text-black mb-2 transition-colors">
+                Open Source
+              </h3>
+              <p className="text-obsidian-400 group-hover:text-black/60 text-sm transition-colors">
+                Audit our code, contribute to the repo, or fork the protocol. 
+                Complete transparency for a private future.
+              </p>
+            </a>
+          </FadeIn>
+
+          {/* X (Twitter) Card */}
+          <FadeIn delay={0.2}>
+            <a 
+              href="#" // Placeholder Link
+              target="_blank" 
+              rel="noreferrer"
+              className="group block p-8 rounded-2xl border border-obsidian-800 bg-background hover:bg-[#1DA1F2] hover:border-[#1DA1F2] transition-all duration-300"
+            >
+              <div className="flex items-start justify-between mb-8">
+                <Twitter className="w-8 h-8 text-white transition-colors" />
+                <ArrowRight className="w-5 h-5 text-obsidian-600 group-hover:text-white -translate-x-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+              </div>
+              <h3 className="text-xl font-serif text-white mb-2 transition-colors">
+                Follow Updates
+              </h3>
+              <p className="text-obsidian-400 group-hover:text-white/80 text-sm transition-colors">
+                Real-time announcements, governance alerts, and community signals.
+                Stay ahead of the curve.
+              </p>
+            </a>
+          </FadeIn>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 // FAQ: Minimal Accordion
 function FAQSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
@@ -428,6 +633,12 @@ export default function HomePage() {
         <VisionSection />
         <ArchitectureSection />
         <FeatureGrid />
+        
+        {/* New Sections Added Here */}
+        <RoadmapSection />
+        {/* <ContractAddressSection /> */}
+        <CommunitySection />
+        
         <FAQSection />
       </main>
 

@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence, useInView } from 'framer-motion';
 import Header from '@/components/core/Header';
 import SwapCard from '@/components/swap/SwapCard';
 import RingSignatureVisualizer from '@/components/privacy/RingSignatureVisualizer';
@@ -12,6 +12,87 @@ import { useMoneroWASM } from '../providers';
 import { useWalletStore } from '@/store/useSwapStore';
 import { SUPPORTED_CURRENCIES, SUPPORTED_CHAINS } from '@/lib/constants';
 import { ShieldCheck, Activity } from 'lucide-react';
+
+// Scroll Reveal Wrapper
+function FadeIn({ children, delay = 0, className = '' }: { children: React.ReactNode; delay?: number; className?: string }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: '-50px' });
+  
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 20 }}
+      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+      transition={{ duration: 0.6, delay, ease: "easeOut" }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+// Roadmap: Quarterly Milestones
+function RoadmapSection() {
+  const quarters = [
+    {
+      quarter: 'Q1 2026',
+      title: 'Foundation',
+      status: 'current',
+      items: ['Multi-chain swap interface', 'MetaMask & Phantom integration', 'Ring signature visualization', 'Public beta launch', 'Security audit completion'],
+    },
+    {
+      quarter: 'Q2 2026',
+      title: 'Expansion',
+      status: 'upcoming',
+      items: ['Mobile-responsive PWA', 'Hardware wallet support', 'Additional EVM chains', 'Limit order functionality', 'Price alerts'],
+    },
+    {
+      quarter: 'Q3 2026',
+      title: 'Integration',
+      status: 'upcoming',
+      items: ['DEX aggregator integration', 'Cross-chain liquidity pools', 'API for developers', 'Institutional features', 'Advanced privacy options'],
+    },
+    {
+      quarter: 'Q4 2026',
+      title: 'Decentralization',
+      status: 'upcoming',
+      items: ['Governance token launch', 'DAO formation', 'Community voting', 'Revenue sharing', 'Grants program'],
+    },
+  ];
+
+  return (
+    <section className="py-32 border-t border-obsidian-900 bg-background">
+      <div className="container mx-auto px-6 max-w-6xl">
+        <FadeIn className="text-center mb-16">
+          <h2 className="text-4xl font-serif text-white mb-4">Development Roadmap</h2>
+          <p className="text-obsidian-400 max-w-2xl mx-auto">Our journey toward decentralized, privacy-preserving finance</p>
+        </FadeIn>
+        
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {quarters.map((q, i) => (
+            <FadeIn key={q.quarter} delay={i * 0.1}>
+              <div className={`p-6 rounded-none border ${q.status === 'current' ? 'border-emerald-500/50 bg-emerald-500/5' : 'border-obsidian-800 bg-obsidian-950/50'}`}>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className={`w-2 h-2 rounded-full ${q.status === 'current' ? 'bg-emerald-500' : 'bg-obsidian-600'}`} />
+                  <span className="font-mono text-sm text-obsidian-400 uppercase tracking-wider">{q.quarter}</span>
+                </div>
+                <h3 className="text-xl font-serif text-white mb-4">{q.title}</h3>
+                <ul className="space-y-2">
+                  {q.items.map((item, j) => (
+                    <li key={j} className="text-sm text-obsidian-400 flex items-start gap-2">
+                      <div className="w-1 h-1 bg-obsidian-600 rounded-full mt-2 flex-shrink-0" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </FadeIn>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
 
 export default function SwapPage() {
   const [showWalletModal, setShowWalletModal] = useState(false);
@@ -126,6 +207,8 @@ export default function SwapPage() {
             </AnimatePresence>
           </motion.div>
         </div>
+
+        <RoadmapSection />
 
         {/* Status Footer - Converted to Bento Card */}
         <motion.div
