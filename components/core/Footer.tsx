@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Twitter, Github, Disc, ExternalLink } from 'lucide-react';
+import { Twitter, Github, ExternalLink } from 'lucide-react';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -113,14 +113,11 @@ export default function Footer() {
           </div>
           
           <div className="flex items-center gap-6">
-            <a href="https://twitter.com" target="_blank" rel="noreferrer" className="text-obsidian-500 hover:text-white transition-colors">
+            <a href="https://x.com/moneroswap_" target="_blank" rel="noreferrer" className="text-obsidian-500 hover:text-white transition-colors">
               <Twitter className="w-5 h-5" />
             </a>
-            <a href="https://github.com" target="_blank" rel="noreferrer" className="text-obsidian-500 hover:text-white transition-colors">
+            <a href="https://github.com/Demerzels-lab/MoneroSwap" target="_blank" rel="noreferrer" className="text-obsidian-500 hover:text-white transition-colors">
               <Github className="w-5 h-5" />
-            </a>
-            <a href="https://discord.com" target="_blank" rel="noreferrer" className="text-obsidian-500 hover:text-white transition-colors">
-              <Disc className="w-5 h-5" />
             </a>
           </div>
         </div>
