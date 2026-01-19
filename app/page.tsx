@@ -452,7 +452,7 @@ function RoadmapSection() {
 // Contract Address (CA) Section
 function ContractAddressSection() {
   const [copied, setCopied] = useState(false);
-  const ca = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"; // Placeholder CA
+  const ca = "4SxH7K9ptARvuChiuosUtuxE1ygj6eF4Xu4qAbxDpump";
 
   const handleCopy = () => {
     navigator.clipboard.writeText(ca);
@@ -636,7 +636,7 @@ export default function HomePage() {
         
         {/* New Sections Added Here */}
         <RoadmapSection />
-        {/* <ContractAddressSection /> */}
+        <ContractAddressSection />
         <CommunitySection />
         
         <FAQSection />
